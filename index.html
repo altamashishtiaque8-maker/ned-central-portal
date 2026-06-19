@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NED Entry Test Prep Portal - Central Dashboard</title>
+  <meta name="description" content="Access practice portals for Mathematics, Physics, Chemistry, and English for the NED University Admission Test. View overall stats and launch live quizzes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07080e;
+      --bg2: #0c0e18;
+      --surface: rgba(255, 255, 255, 0.035);
+      --surface-hover: rgba(255, 255, 255, 0.065);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.18);
+      --text: #eef1f8;
+      --muted: #9aa1b5;
+      --faint: #5e6478;
+
+      /* Subject-specific gradients */
+      --math-g1: #6d5cff;
+      --math-g2: #21d4fd;
+      --math-grad: linear-gradient(135deg, var(--math-g1), var(--math-g2));
+      
+      --phys-g1: #8b5cf6;
+      --phys-g2: #ec4899;
+      --phys-grad: linear-gradient(135deg, var(--phys-g1), var(--phys-g2));
+      
+      --chem-g1: #22d3ee;
+      --chem-g2: #6366f1;
+      --chem-grad: linear-gradient(135deg, var(--chem-g1), var(--chem-g2));
+
+      --eng-g1: #f472b6;
+      --eng-g2: #ff5c8a;
+      --eng-grad: linear-gradient(135deg, var(--eng-g1), var(--eng-g2));
+
+      --grad: linear-gradient(100deg, #22d3ee, #6d5cff 42%, #ec4899 74%, #ff5c8a);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 700px at 10% -10%, rgba(109, 92, 255, 0.15), transparent 60%),
+        radial-gradient(1000px 600px at 95% 0%, rgba(33, 212, 253, 0.11), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      line-height: 1.55;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono {
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Top glowing bar decoration */
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      z-index: 60;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    #topfill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #22d3ee, #6d5cff, #ec4899, #ff5c8a, #22d3ee);
+      background-size: 300% 100%;
+      animation: slide 6s linear infinite;
+    }
+    @keyframes slide {
+      to { background-position: 300% 0; }
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.76rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--math-g2);
+      margin-bottom: 16px;
+      text-align: center;
+      display: block;
+    }
+
+    .gtext {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    /* Hero Section */
+    header.hero {
+      text-align: center;
+      padding: 30px 0 10px;
+      margin-bottom: 40px;
+    }
+
+    header.hero h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 900;
+      font-size: clamp(2.5rem, 7.5vw, 4.8rem);
+      line-height: 1.05;
+      margin: 0 0 20px;
+      letter-spacing: -1px;
+    }
+
+    header.hero p.sub {
+      color: var(--muted);
+      font-size: clamp(1.02rem, 2vw, 1.25rem);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Overall Statistics Panel */
+    .stats-panel {
+      background: linear-gradient(180deg, var(--surface), rgba(255, 255, 255, 0.01));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 860px;
+      margin: 0 auto 50px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 12px 6px;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-box:last-child {
+      border-right: none;
+    }
+
+    .stat-box .val {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .stat-box .label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Subject cards grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--surface), rgba(12, 14, 24, 0.5));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.3);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      padding: 1.5px;
+      background: transparent;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      transition: background 0.35s ease;
+    }
+
+    /* Specific gradients on card hover */
+    .card.maths:hover::before { background: var(--math-grad); }
+    .card.physics:hover::before { background: var(--phys-grad); }
+    .card.chemistry:hover::before { background: var(--chem-grad); }
+    .card.english:hover::before { background: var(--eng-grad); }
+
+    .card:hover {
+      transform: translateY(-8px);
+      background: var(--surface-hover);
+      border-color: transparent;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .card.maths:hover { box-shadow: 0 20px 40px -15px rgba(109, 92, 255, 0.25); }
+    .card.physics:hover { box-shadow: 0 20px 40px -15px rgba(236, 72, 153, 0.25); }
+    .card.chemistry:hover { box-shadow: 0 20px 40px -15px rgba(34, 211, 238, 0.25); }
+    .card.english:hover { box-shadow: 0 20px 40px -15px rgba(244, 114, 182, 0.25); }
+
+    .card .icon-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      margin-bottom: 24px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.3s ease;
+    }
+
+    .card.maths .icon-tag { color: var(--math-g2); border-color: rgba(33, 212, 253, 0.25); }
+    .card.physics .icon-tag { color: var(--phys-g2); border-color: rgba(236, 72, 153, 0.25); }
+    .card.chemistry .icon-tag { color: var(--chem-g1); border-color: rgba(34, 211, 238, 0.25); }
+    .card.english .icon-tag { color: var(--eng-g1); border-color: rgba(244, 114, 182, 0.25); }
+
+    .card:hover .icon-tag {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .card p.desc {
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin: 0 0 28px;
+      flex-grow: 1;
+      line-height: 1.55;
+    }
+
+    /* Scoreboard within Card */
+    .card-stats {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      font-size: 0.86rem;
+    }
+
+    .card-stats .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .card-stats .stat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .card-stats .stat-lbl {
+      color: var(--muted);
+    }
+
+    .card-stats .stat-val {
+      font-family: 'DM Mono', monospace;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* Buttons inside cards */
+    .card-btn {
+      width: 100%;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.94rem;
+      color: #05060b;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      background: var(--text);
+      text-decoration: none;
+    }
+
+    .card.maths .card-btn { background: var(--math-grad); color: #04050a; }
+    .card.physics .card-btn { background: var(--phys-grad); color: #ffffff; }
+    .card.chemistry .card-btn { background: var(--chem-grad); color: #04050a; }
+    .card.english .card-btn { background: var(--eng-grad); color: #ffffff; }
+
+    .card:hover .card-btn {
+      transform: scale(1.02);
+    }
+
+    .card.maths:hover .card-btn { box-shadow: 0 6px 15px -5px var(--math-g1); }
+    .card.physics:hover .card-btn { box-shadow: 0 6px 15px -5px var(--phys-g1); }
+    .card.chemistry:hover .card-btn { box-shadow: 0 6px 15px -5px var(--chem-g1); }
+    .card.english:hover .card-btn { box-shadow: 0 6px 15px -5px var(--eng-g1); }
+
+    /* Key Features Section */
+    .features-panel {
+      max-width: 860px;
+      margin: 40px auto 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(12px);
+    }
+
+    .features-panel h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin: 0 0 18px;
+      text-align: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 12px;
+    }
+
+    .feature-icon {
+      color: var(--math-g2);
+      font-family: 'DM Mono', monospace;
+      font-weight: bold;
+      font-size: 1.1rem;
+      line-height: 1;
+      padding-top: 3px;
+    }
+
+    .feature-content h4 {
+      margin: 0 0 4px;
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+
+    .feature-content p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 80px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer .by {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 9px 20px;
+      color: var(--muted);
+    }
+
+    footer .by b {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      font-weight: 600;
+    }
+
+    footer .note {
+      color: var(--faint);
+      font-size: 0.74rem;
+      margin-top: 14px;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .stats-panel {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .stat-box {
+        padding: 6px 0;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .wrap {
+        padding: 40px 16px 60px;
+      }
+      .stats-panel {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 20px;
+      }
+      .stat-box {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 12px;
+      }
+      .stat-box:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="topbar"><div id="topfill"></div></div>
+
+  <!-- Adsterra Banner Header Code Block placeholder
+       <div class="ad-container" style="text-align:center; margin: 15px 0;">
+         <script type="text/javascript">
+           // Paste your Adsterra banner scripts here
+         </script>
+       </div>
+  -->
+
+  <div class="wrap">
+    <span class="eyebrow">NED University Admission Test Preparation</span>
+    
+    <header class="hero">
+      <h1>The <span class="gtext">Central</span><br>Prep Dashboard</h1>
+      <p class="sub">A premium, unified hub designed to maximize your score on the NED entrance exams. Choose a subject card below to practice recreation papers with active Worked Keys.</p>
+    </header>
+
+    <!-- Global Stats Dashboard (Dynamic counts calculated from subject configuration) -->
+    <section class="stats-panel" id="globalStats">
+      <div class="stat-box">
+        <div class="val gtext" id="statQuestions">0</div>
+        <div class="label">Total MCQs</div>
+      </div>
+      <div class="stat-box">
+        <div class="val gtext" id="statSubjects">0</div>
+        <div class="label">Subjects Ready</div>
+      </div>
+      <div class="stat-box">
+        <div class="val gtext" id="statType">MCQ</div>
+        <div class="label">Format</div>
+      </div>
+    </section>
+
+    <!-- Dynamic Cards Render Container -->
+    <main class="grid" id="subjectsGrid"></main>
+
+    <!-- Adsterra Middle Page Native Ad Block placeholder
+         <div class="ad-container-native" style="max-width:860px; margin: 30px auto; text-align:center;">
+           <script type="text/javascript">
+             // Paste your Adsterra native banner scripts here
+           </script>
+         </div>
+    -->
+
+    <!-- Key Features List -->
+    <section class="features-panel">
+      <h3>Engine Features &amp; Methodology</h3>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">&#9670;</div>
+          <div class="feature-content">
+            <h4>Verified Answer Keys</h4>
+            <p>Every answer key was re-derived and verified by hand to resolve ambiguities or typos present in scanned sources.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">&#9670;</div>
+          <div class="feature-content">
+            <h4>Adsterra Integrations</h4>
+            <p>Quizzes are fully hosted on external links, preserving all of your integrated Adsterra banner placements and ad codes.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">&#9670;</div>
+          <div class="feature-content">
+            <h4>Self-Marking Engines</h4>
+            <p>Runs are calculated in real time, scoring your results instantly while providing a question navigator for detailed answer review.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">&#9670;</div>
+          <div class="feature-content">
+            <h4>Highly Scalable Design</h4>
+            <p>The dashboard is dynamically configured. New sections or subjects can be added in seconds by editing the configuration array.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span class="by">Prepared By <b>Altamash</b></span>
+      <div class="note">A unified exam preparation tool built from recreation papers. Not affiliated officially with NED University.</div>
+    </footer>
+  </div>
+
+  <script>
+    /**
+     * DYNAMIC SUBJECT CONFIGURATION
+     * 
+     * To add a new subject to this dashboard in the future, simply add a new object 
+     * to this SUBJECTS array. The layout, card rendering, and global question counts
+     * will update automatically!
+     */
+    const SUBJECTS = [
+      {
+        id: 'maths',
+        name: 'Mathematics',
+        url: 'https://ned-math-quiz.netlify.app',
+        repo: 'https://github.com/altamashishtiaque8-maker/ned-math-quiz',
+        desc: 'Practice algebra, calculus, conics, vectors, matrices, trigonometry, and analytical geometry. Shuffled mock sets.',
+        questions: 313,
+        icon: '📐',
+        colorClass: 'maths'
+      },
+      {
+        id: 'physics',
+        name: 'Physics',
+        url: 'https://ned-physics-quiz.netlify.app',
+        repo: 'https://github.com/altamashishtiaque8-maker/ned-physics-quiz',
+        desc: 'Master mechanics, waves, oscillations, thermodynamics, electrostatics, electromagnetism, and modern physics.',
+        questions: 405,
+        icon: '⚡',
+        colorClass: 'physics'
+      },
+      {
+        id: 'chemistry',
+        name: 'Chemistry',
+        url: 'https://ned-chemistry-quiz.netlify.app',
+        repo: 'https://github.com/altamashishtiaque8-maker/ned-chemistry-quiz',
+        desc: 'Revise molecular geometry, thermodynamics, organic compounds, zwitterions, polymer compounds, and chemical bonding.',
+        questions: 484,
+        icon: '🧪',
+        colorClass: 'chemistry'
+      },
+      {
+        id: 'english',
+        name: 'English',
+        url: 'https://ned-english-quiz.netlify.app', // Configured as a placeholder for English portal
+        repo: 'https://github.com/altamashishtiaque8-maker/ned-english-quiz',
+        desc: 'Enhance your vocabulary, reading comprehension, grammatical error detection, and sentence completion matching.',
+        questions: 25,
+        icon: '📖',
+        colorClass: 'english'
+      }
+    ];
+
+    // Renders the dashboard dynamically from configuration
+    function renderDashboard() {
+      const grid = document.getElementById('subjectsGrid');
+      grid.innerHTML = '';
+
+      let totalQuestions = 0;
+
+      SUBJECTS.forEach(sub => {
+        totalQuestions += sub.questions;
+
+        const card = document.createElement('article');
+        card.className = `card ${sub.colorClass}`;
+        
+        // Setup card inner HTML
+        card.innerHTML = `
+          <div class="icon-tag">${sub.name}</div>
+          <h2>${sub.name}</h2>
+          <p class="desc">${sub.desc}</p>
+          
+          <div class="card-stats">
+            <div class="stat-row">
+              <span class="stat-lbl">Questions Pool:</span>
+              <span class="stat-val">${sub.questions} MCQs</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-lbl">Subject Symbol:</span>
+              <span class="stat-val">${sub.icon}</span>
+            </div>
+          </div>
+
+          <a href="${sub.url}" class="card-btn" target="_blank" rel="noopener noreferrer">
+            Launch Test &nbsp;→
+          </a>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      // Update aggregate stats panel
+      document.getElementById('statQuestions').textContent = totalQuestions.toLocaleString();
+      document.getElementById('statSubjects').textContent = SUBJECTS.length;
+    }
+
+    // Initialize rendering on load
+    window.addEventListener('load', renderDashboard);
+  </script>
+</body>
+</html>

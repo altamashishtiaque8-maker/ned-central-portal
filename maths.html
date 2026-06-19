@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>NED Maths Test Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)'],['$','$']], displayMath: [['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+<style>
+:root{
+  --bg:#0a0c14; --bg2:#0f1320; --panel:#141826; --panel2:#1a1f30;
+  --line:#262c40; --line2:#323a55;
+  --ink:#e8ebf5; --muted:#8b93ad; --faint:#5b637e;
+  --g1:#6d5cff; --g2:#21d4fd; --g3:#ff5c8a;
+  --ok:#2fe39a; --okbg:rgba(47,227,154,.12); --okbd:rgba(47,227,154,.55);
+  --no:#ff5d6c; --nobg:rgba(255,93,108,.12); --nobd:rgba(255,93,108,.55);
+  --warn:#ffb24d;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:
+    radial-gradient(1200px 700px at 12% -10%, rgba(109,92,255,.16), transparent 60%),
+    radial-gradient(1000px 600px at 95% 0%, rgba(33,212,253,.12), transparent 55%),
+    var(--bg);
+  color:var(--ink); line-height:1.55; min-height:100vh; overflow-x:hidden;
+}
+.mono{font-family:'DM Mono',monospace}
+/* top progress bar */
+#topbar{position:fixed;top:0;left:0;right:0;height:4px;z-index:60;background:rgba(255,255,255,.05)}
+#topfill{height:100%;width:0;background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3),var(--g1));
+  background-size:300% 100%;animation:slide 6s linear infinite;transition:width .35s ease;border-radius:0 3px 3px 0}
+@keyframes slide{to{background-position:300% 0}}
+/* watermark */
+#wm{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.05}
+#wm div{position:absolute;white-space:nowrap;font-family:'Playfair Display',serif;font-weight:800;
+  font-size:38px;color:#fff;transform:rotate(-30deg);letter-spacing:2px}
+.wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:34px 18px 120px}
+.hidden{display:none!important}
+.eyebrow{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--g2)}
+.grad-text{background:linear-gradient(110deg,var(--g1),var(--g2) 55%,var(--g3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* ---------- COVER ---------- */
+#cover .hero{padding:30px 0 8px}
+#cover h1{font-family:'Playfair Display',serif;font-weight:900;line-height:1.02;
+  font-size:clamp(40px,9vw,76px);margin:14px 0 6px;letter-spacing:-1px}
+#cover .sub{color:var(--muted);max-width:560px;font-size:16px}
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:30px 0}
+.stat{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:18px 16px}
+.stat .n{font-family:'Playfair Display',serif;font-weight:800;font-size:34px;line-height:1}
+.stat .l{color:var(--muted);font-size:12.5px;margin-top:6px;letter-spacing:.3px}
+.picker-label{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:26px 0 10px}
+.papers{display:flex;flex-wrap:wrap;gap:10px}
+.paperbtn{border:1px solid var(--line2);background:var(--panel);color:var(--ink);
+  padding:11px 18px;border-radius:999px;font-weight:600;cursor:pointer;font-size:14px;transition:.18s}
+.paperbtn:hover{border-color:var(--g2)}
+.paperbtn.active{background:linear-gradient(110deg,var(--g1),var(--g2));border-color:transparent;color:#06080f}
+.opts{display:flex;flex-wrap:wrap;gap:14px;margin:22px 0 6px;color:var(--muted);font-size:14px}
+.opts label{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.opts input{accent-color:var(--g1);width:16px;height:16px}
+.cta{margin-top:26px;display:inline-flex;align-items:center;gap:12px;
+  font-weight:700;font-size:17px;color:#06080f;cursor:pointer;border:none;
+  background:linear-gradient(110deg,var(--g1),var(--g2) 60%,var(--g3));
+  padding:16px 34px;border-radius:14px;box-shadow:0 12px 40px -12px rgba(109,92,255,.7);transition:.2s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 18px 48px -12px rgba(33,212,253,.6)}
+.note{margin-top:30px;border-left:3px solid var(--g2);padding:12px 16px;background:rgba(33,212,253,.05);
+  border-radius:0 10px 10px 0;color:var(--muted);font-size:13.5px}
+.note b{color:var(--ink)}
+
+/* ---------- HEADER (during test) ---------- */
+#hdr{position:sticky;top:0;z-index:40;display:none;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:12px 14px;margin:-4px 0 22px;border-radius:0 0 16px 16px;
+  background:rgba(10,12,20,.82);backdrop-filter:blur(12px);border:1px solid var(--line);border-top:none}
+.pill{display:inline-flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:13px;
+  padding:7px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+.pill b{color:var(--ink)}
+.pill .dot{width:8px;height:8px;border-radius:50%}
+#timerPill.warn{color:var(--warn);border-color:var(--warn)}
+.spacer{flex:1}
+.tinybtn{font-family:'DM Sans';font-size:13px;font-weight:600;background:var(--panel2);border:1px solid var(--line2);
+  color:var(--ink);padding:8px 14px;border-radius:10px;cursor:pointer}
+.tinybtn:hover{border-color:var(--g2)}
+.answered-line{height:6px;border-radius:6px;background:var(--line);overflow:hidden;flex-basis:100%;margin-top:4px}
+.answered-line i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--g1),var(--g2));transition:width .3s}
+
+/* ---------- QUESTION CARD ---------- */
+.qcard{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+  border-radius:20px;padding:26px 24px;box-shadow:0 24px 60px -30px #000}
+.qtop{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.qbadge{font-family:'DM Mono',monospace;font-weight:500;font-size:14px;color:#06080f;
+  background:linear-gradient(110deg,var(--g1),var(--g2));padding:6px 12px;border-radius:9px}
+.qsrc{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line2);padding:5px 10px;border-radius:8px}
+.qtext{font-size:19px;font-weight:500;margin:4px 0 22px;line-height:1.6}
+.optbtn{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;
+  background:var(--panel2);border:1.5px solid var(--line);color:var(--ink);
+  padding:15px 16px;border-radius:13px;margin-bottom:12px;font-size:16px;font-family:'DM Sans';transition:.15s}
+.optbtn:hover:not(:disabled){border-color:var(--g2);transform:translateX(2px)}
+.optbtn:disabled{cursor:default}
+.optkey{font-family:'DM Mono',monospace;font-weight:500;width:30px;height:30px;flex:none;
+  display:grid;place-items:center;border-radius:8px;background:var(--bg);border:1px solid var(--line2);font-size:14px}
+.optbody{flex:1;padding-top:3px}
+.optbtn.correct{background:var(--okbg);border-color:var(--okbd)}
+.optbtn.correct .optkey{background:var(--ok);color:#06120c;border-color:transparent}
+.optbtn.wrong{background:var(--nobg);border-color:var(--nobd)}
+.optbtn.wrong .optkey{background:var(--no);color:#190406;border-color:transparent}
+.feedback{margin-top:6px;padding:13px 16px;border-radius:12px;font-size:14.5px;display:none}
+.feedback.show{display:block}
+.feedback.good{background:var(--okbg);border:1px solid var(--okbd);color:#aef0d4}
+.feedback.bad{background:var(--nobg);border:1px solid var(--nobd);color:#ffc6cc}
+.feedback .uflag{display:block;margin-top:8px;color:var(--warn);font-size:13px}
+.feedback b{color:#fff}
+
+.navbtns{display:flex;gap:12px;margin-top:22px}
+.navbtns button{flex:1;font-family:'DM Sans';font-weight:700;font-size:15px;padding:14px;border-radius:13px;cursor:pointer;transition:.18s;border:1px solid var(--line2)}
+#prevBtn{background:var(--panel);color:var(--ink)}
+#prevBtn:hover:not(:disabled){border-color:var(--g2)}
+#nextBtn{background:linear-gradient(110deg,var(--g1),var(--g2));color:#06080f;border-color:transparent}
+#nextBtn:hover{transform:translateY(-1px)}
+button:disabled{opacity:.4;cursor:not-allowed}
+
+/* ---------- NAVIGATOR ---------- */
+.navsec{margin-top:30px}
+.navsec h3{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:500}
+.navgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:8px}
+.navcell{aspect-ratio:1;display:grid;place-items:center;border-radius:9px;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:13px;background:var(--panel);border:1px solid var(--line);color:var(--muted);transition:.12s}
+.navcell:hover{border-color:var(--g2);color:var(--ink)}
+.navcell.cur{outline:2px solid var(--g2);outline-offset:1px;color:var(--ink)}
+.navcell.correct{background:var(--okbg);border-color:var(--okbd);color:#aef0d4}
+.navcell.wrong{background:var(--nobg);border-color:var(--nobd);color:#ffc6cc}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:4px;display:inline-block}
+
+/* ---------- RESULTS ---------- */
+#results{text-align:center}
+.bigscore{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(64px,18vw,128px);line-height:1;margin:10px 0}
+.verdict{font-size:18px;color:var(--muted);margin-bottom:8px}
+.rcards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:30px 0}
+.rcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 10px}
+.rcard .n{font-family:'Playfair Display',serif;font-weight:800;font-size:30px;line-height:1}
+.rcard .l{color:var(--muted);font-size:12px;margin-top:6px;letter-spacing:.4px}
+.rcard.c .n{color:var(--ok)} .rcard.w .n{color:var(--no)} .rcard.s .n{color:var(--muted)} .rcard.t .n{color:var(--g2)}
+.rbtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.rbtns button{font-family:'DM Sans';font-weight:700;font-size:15px;padding:14px 24px;border-radius:13px;cursor:pointer;border:1px solid var(--line2);background:var(--panel);color:var(--ink);transition:.18s}
+.rbtns button:hover{border-color:var(--g2)}
+.rbtns .primary{background:linear-gradient(110deg,var(--g1),var(--g2));color:#06080f;border-color:transparent}
+
+/* ---------- REVIEW ---------- */
+#review h2{font-family:'Playfair Display',serif;font-weight:800;font-size:34px;margin:0 0 4px}
+.rev-item{background:var(--panel);border:1px solid var(--line);border-left-width:4px;border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.rev-item.c{border-left-color:var(--ok)} .rev-item.w{border-left-color:var(--no)} .rev-item.s{border-left-color:var(--line2)}
+.rev-q{font-size:16px;font-weight:500;margin:8px 0 14px;line-height:1.55}
+.rev-row{display:flex;gap:10px;font-size:14.5px;margin:5px 0;align-items:flex-start}
+.rev-row .tag{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);min-width:90px;padding-top:2px}
+.rev-row.yours .val{color:#ffc6cc} .rev-item.c .rev-row.yours .val{color:#aef0d4}
+.rev-row.right .val{color:#aef0d4}
+.rev-row.skip .val{color:var(--muted)}
+.rev-uflag{margin-top:10px;color:var(--warn);font-size:13px;border-top:1px dashed var(--line2);padding-top:10px}
+.revtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+@media (max-width:560px){
+  .statrow{grid-template-columns:1fr 1fr}
+  .rcards{grid-template-columns:1fr 1fr}
+  .wrap{padding:24px 14px 120px}
+  .qcard{padding:22px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.credit{text-align:center;color:var(--faint);font-size:12px;font-family:'DM Mono',monospace;letter-spacing:1px;margin-top:40px}
+</style>
+</head>
+<body>
+<div id="topbar"><div id="topfill"></div></div>
+<div id="wm"></div>
+
+<div class="wrap">
+
+  <!-- ================= COVER ================= -->
+  <section id="cover">
+    <div class="hero">
+      <div class="eyebrow">NED Recreation · Practice Portal</div>
+      <h1>Mathematics<br><span class="grad-text">Mock Test</span></h1>
+      <p class="sub">A full timed run through the NED Round-2 mathematics question bank — calculus, algebra, vectors, conics, trigonometry and more. Every answer is worked out and verified.</p>
+    </div>
+
+    <div class="statrow">
+      <div class="stat"><div class="n mono" id="stTotal">0</div><div class="l">Questions</div></div>
+      <div class="stat"><div class="n mono">MCQ</div><div class="l">4 options each</div></div>
+      <div class="stat"><div class="n mono">90<span style="font-size:18px">m</span></div><div class="l">Suggested limit</div></div>
+    </div>
+
+    <div class="picker-label">Choose a set</div>
+    <div class="papers" id="papers"></div>
+
+    <div class="opts">
+      <label><input type="checkbox" id="optShuffle" checked> Shuffle questions</label>
+      <label><input type="checkbox" id="optShuffleOpts"> Shuffle options too</label>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;">
+      <button class="cta" id="startBtn" style="margin-top:0;">Start Test &nbsp;→</button>
+      <button class="cta" onclick="window.location.href='index.html'" style="background:var(--panel);color:var(--ink);border:1px solid var(--line2);box-shadow:none;margin-top:0;" id="dashBtn">Back to Dashboard</button>
+    </div>
+
+    <div class="note">
+      <b>About the answer key.</b> This portal covers the <b>NED Math Practice Handout R-2 (2023)</b> — the one complete paper that lists all four options per question. Each answer here was re-derived and verified by hand rather than copied from the scanned key. A handful of items whose scanned source is garbled or whose printed options omit the true value are flagged <b style="color:var(--warn)">Uncertain</b> in the feedback and review. The 2025 Recreation sheet is ~90% the same recycled bank, and the topic-wise Practice Sheet mixes formulas with partial MCQs — say the word and I'll fold those in too.
+    </div>
+  </section>
+
+  <!-- ================= TEST HEADER ================= -->
+  <div id="hdr">
+    <span class="pill"><span class="dot" style="background:var(--g2)"></span>Q <b id="hQ">1</b>/<span id="hTotal">0</span></span>
+    <span class="pill" id="timerPill">⏱ <b id="timer">00:00</b></span>
+    <span class="pill"><span class="dot" style="background:var(--ok)"></span>Correct <b id="hCorrect">0</b></span>
+    <span class="spacer"></span>
+    <button class="tinybtn" id="finishBtn">Finish</button>
+    <div class="answered-line"><i id="answeredFill"></i></div>
+    <div style="flex-basis:100%;font-size:12px;color:var(--muted);font-family:'DM Mono'"><span id="answeredCount">0</span> answered</div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <section id="quiz" class="hidden">
+    <div class="qcard">
+      <div class="qtop">
+        <span class="qbadge mono" id="qBadge">Q1</span>
+        <span class="qsrc" id="qSrc">NED 2023</span>
+      </div>
+      <div class="qtext" id="qText"></div>
+      <div id="optWrap"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="navbtns">
+        <button id="prevBtn">← Prev</button>
+        <button id="nextBtn">Next →</button>
+      </div>
+    </div>
+
+    <div class="navsec">
+      <h3>Question Navigator</h3>
+      <div class="navgrid" id="navGrid"></div>
+      <div class="legend">
+        <span><i style="background:var(--okbg);border:1px solid var(--okbd)"></i>Correct</span>
+        <span><i style="background:var(--nobg);border:1px solid var(--nobd)"></i>Wrong</span>
+        <span><i style="background:var(--panel);border:1px solid var(--line)"></i>Unanswered</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section id="results" class="hidden">
+    <div class="eyebrow">Test Complete</div>
+    <div class="bigscore grad-text" id="scorePct">0%</div>
+    <div class="verdict" id="verdict"></div>
+    <div class="rcards">
+      <div class="rcard c"><div class="n mono" id="rCorrect">0</div><div class="l">Correct</div></div>
+      <div class="rcard w"><div class="n mono" id="rWrong">0</div><div class="l">Wrong</div></div>
+      <div class="rcard s"><div class="n mono" id="rSkip">0</div><div class="l">Skipped</div></div>
+      <div class="rcard t"><div class="n mono" id="rTime">0:00</div><div class="l">Time Taken</div></div>
+    </div>
+    <div class="rbtns">
+      <button class="primary" id="reviewBtn">Review Answers</button>
+      <button id="restartBtn">Restart Test</button>
+      <button id="homeBtn">Back to Home</button>
+    </div>
+  </section>
+
+  <!-- ================= REVIEW ================= -->
+  <section id="review" class="hidden">
+    <div class="revtop">
+      <h2>Review</h2>
+      <span class="spacer"></span>
+      <button class="tinybtn" id="reviewBack">← Back to results</button>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin:2px 0 22px">Every question, your answer, and the verified correct answer.</p>
+    <div id="reviewList"></div>
+  </section>
+
+  <div class="credit">Prepared by Altamash</div>
+</div>
+
+<script>
+const ALL = [{"q": "\\(\\sin\\theta+\\sin(-\\theta)+\\cos\\theta+\\cos(-\\theta)+\\tan\\theta+\\tan(-\\theta)=\\) ?", "o": ["\\(\\sin\\theta\\)", "\\(\\cos\\theta\\)", "\\(2\\cos\\theta\\)", "\\(\\tan\\theta\\)"], "a": 2, "id": 1, "paper": "NED 2023"}, {"q": "If \\(P(A)=\\tfrac12,\\ P(B)=\\tfrac14,\\ P(A\\cap B)=\\tfrac18\\), then \\(P(A\\cup B)=\\)?", "o": ["\\(\\tfrac58\\)", "\\(\\tfrac78\\)", "\\(\\tfrac38\\)", "\\(\\tfrac85\\)"], "a": 0, "id": 2, "paper": "NED 2023"}, {"q": "\\(x^2=-4y\\); equation of directrix and axis of parabola is", "o": ["\\(y=1,\\ x=0\\)", "\\(y=-1,\\ x=0\\)", "\\(y=0,\\ x=1\\)", "None"], "a": 0, "id": 3, "paper": "NED 2023"}, {"q": "\\(0!\\) and \\(1!\\) are", "o": ["0", "1", "2", "\\(\\pm1\\)"], "a": 1, "id": 4, "paper": "NED 2023"}, {"q": "If one row of any square matrix is zero then determinant of matrix will be", "o": ["1", "−1", "0", "None"], "a": 2, "id": 5, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_0^{\\pi/2}\\sin^3x\\cos x\\,dx\\)", "o": ["\\(\\tfrac13\\)", "\\(\\tfrac14\\)", "\\(\\tfrac15\\)", "\\(-\\tfrac14\\)"], "a": 1, "id": 6, "paper": "NED 2023"}, {"q": "The term independent of \\(x\\) in the expansion \\(\\left(x^2-\\dfrac{2}{x^2}\\right)^{12}\\)", "o": ["−8064", "−59136", "59136", "8064"], "a": 2, "id": 7, "paper": "NED 2023"}, {"q": "If the discriminant of a quadratic equation is −4, the roots of equation are", "o": ["Real", "Equal", "Complex", "None"], "a": 2, "id": 8, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{e^{1/u}}{u^2}\\,du\\)", "o": ["\\(e^{1/u}+c\\)", "\\(-e^{1/u}+c\\)", "\\(\\tfrac{e^{1/u}}{2}+c\\)", "None"], "a": 1, "id": 9, "paper": "NED 2023"}, {"q": "\\(\\dfrac{2+5i}{1-i}=x-yi\\) then the value of \\(x-yi\\)", "o": ["\\(\\tfrac{-3+7i}{2}\\)", "\\(\\tfrac{-3-7i}{2}\\)", "\\(\\tfrac{3+7i}{2}\\)", "None"], "a": 0, "id": 10, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0^+}x^x=\\) ?", "o": ["1", "−1", "0", "not defined"], "a": 0, "id": 11, "paper": "NED 2023"}, {"q": "Equation of ellipse when centre is at origin, minor axis along \\(x\\)-axis, length of major axis is 10 and distance between foci is 8", "o": ["\\(\\tfrac{x^2}{9}+\\tfrac{y^2}{25}=1\\)", "\\(\\tfrac{x^2}{9}+\\tfrac{y^2}{16}=1\\)", "\\(\\tfrac{x^2}{25}+\\tfrac{y^2}{9}=1\\)", "None"], "a": 0, "id": 12, "paper": "NED 2023"}, {"q": "\\(2^3\\cdot2^2=2^K\\) then \\(K\\) is", "o": ["5", "4", "3", "2"], "a": 0, "id": 13, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{2x\\,dx}{1+x^2}\\)", "o": ["\\((1+x^2)+c\\)", "\\(\\ln(1+x^2)+c\\)", "\\(\\ln 2x+c\\)", "\\(-\\ln(1+x^2)+c\\)"], "a": 1, "id": 14, "paper": "NED 2023"}, {"q": "\\(w^{32}=\\) ? (\\(w\\) a cube root of unity)", "o": ["\\(w\\)", "\\(w^2\\)", "1", "0"], "a": 1, "id": 15, "paper": "NED 2023"}, {"q": "\\(\\sqrt{y}-e^x=2\\) then \\(\\dfrac{dy}{dx}=\\) ?", "o": ["\\(\\tfrac{e^x}{2\\sqrt{y}}\\)", "\\(e^x\\,2\\sqrt{y}\\)", "\\(\\tfrac{e^x}{2}\\)", "None"], "a": 1, "id": 16, "paper": "NED 2023"}, {"q": "\\(x^2+y^2-4x-6y+9=0\\) then centre is", "o": ["\\((2,-3)\\)", "\\((2,3)\\)", "\\((-2,-3)\\)", "\\((3,2)\\)"], "a": 1, "id": 17, "paper": "NED 2023"}, {"q": "If \\(A^{K+1}=A\\) and \\(K\\) is a positive integer then it is ___ matrix.", "o": ["Periodic", "Null", "Idempotent", "None"], "a": 0, "id": 18, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int x^5 e^{7-4x^6}\\,dx\\)", "o": ["\\(e^{7-4x^6}+c\\)", "\\(-\\tfrac{1}{24}e^{7-4x^6}+c\\)", "\\(-\\tfrac14 e^{7-4x^6}+c\\)", "None"], "a": 1, "id": 19, "paper": "NED 2023"}, {"q": "\\(\\sin\\theta+\\cos\\theta\\cot\\theta=\\) ?", "o": ["\\(\\sin\\theta\\)", "\\(\\operatorname{cosec}\\theta\\)", "\\(\\sec\\theta\\)", "\\(\\tan\\theta\\)"], "a": 1, "id": 20, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to\\pi/2}\\dfrac{\\cos x}{x^2}=\\) ?", "o": ["\\(\\tfrac{\\pi}{2}\\)", "0", "1", "−1"], "a": 1, "id": 21, "paper": "NED 2023"}, {"q": "Solve for \\(x\\): \\(\\begin{vmatrix}1&a&b\\\\1&x&b\\\\1&c&x\\end{vmatrix}=0\\)", "o": ["\\((a,b)\\)", "\\((a^2,a)\\)", "\\((a^2,b^2)\\)", "\\((b,b^2)\\)"], "a": 0, "id": 22, "paper": "NED 2023"}, {"q": "Partial fraction of \\(\\dfrac{1}{x^3-x}\\) is", "o": ["\\(\\tfrac{A}{x}+\\tfrac{B}{x^2-1}\\)", "\\(\\tfrac{A}{x}+\\tfrac{B}{x-1}+\\tfrac{C}{x+1}\\)", "\\(\\tfrac{A}{x}-\\tfrac{B}{x-1}\\)", "\\(\\tfrac{A}{x}+\\tfrac{B}{x-1}-\\tfrac{C}{x+1}\\)"], "a": 1, "id": 23, "paper": "NED 2023"}, {"q": "\\(\\left(2+\\dfrac{x}{2}\\right)^9\\) then the coefficient of sixth term is", "o": ["64", "63", "62", "65"], "a": 1, "id": 24, "paper": "NED 2023"}, {"q": "How many numbers are there between 256 and 789 that are divisible by 7?", "o": ["74", "75", "76", "78"], "a": 2, "id": 25, "paper": "NED 2023"}, {"q": "\\(\\dfrac{a^{-1}+b^{-1}}{a^{-1}}=\\) ?", "o": ["\\(\\tfrac{a+b}{b}\\)", "\\(\\tfrac{a+b}{a}\\)", "\\(a+b\\)", "\\(\\tfrac{a}{a-b}\\)"], "a": 0, "id": 26, "paper": "NED 2023"}, {"q": "If a polynomial \\(x^3+ax^2-a^2x-a^3\\) is divided by \\(x+a\\) then remainder is", "o": ["\\(a^2\\)", "\\(a^3\\)", "\\(a\\)", "0"], "a": 3, "id": 27, "paper": "NED 2023"}, {"q": "\\(i^3=\\) ?", "o": ["1", "−1", "\\(i\\)", "\\(-i\\)"], "a": 3, "id": 28, "paper": "NED 2023"}, {"q": "Eccentricity of circle is", "o": ["0", "1", "1.5", "0.5"], "a": 0, "id": 29, "paper": "NED 2023"}, {"q": "\\(\\sin\\theta+\\sin(-\\theta)+\\cos\\theta+\\cos(-\\theta)+\\tan\\theta+\\tan(-\\theta)=\\) ?", "o": ["\\(\\sin\\theta\\)", "\\(\\cos\\theta\\)", "\\(2\\cos\\theta\\)", "\\(\\tan\\theta\\)"], "a": 2, "id": 30, "paper": "NED 2023"}, {"q": "\\(\\sqrt{\\dfrac{1+\\cos\\theta}{1-\\cos\\theta}}=\\dfrac{x}{y}\\) then \\(\\tan\\theta=\\) ?", "o": ["\\(\\tfrac{2xy}{x^2-y^2}\\)", "\\(\\tfrac{x^2-y^2}{2xy}\\)", "\\(\\tfrac{2xy}{x^2+y^2}\\)", "None"], "a": 0, "id": 31, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\left[\\dfrac{f(x)}{g(x)}\\right]=\\) ?", "o": ["\\(\\tfrac{f(x)g'(x)+g(x)f'(x)}{[g(x)]^2}\\)", "\\(\\tfrac{f(x)g'(x)-g(x)f'(x)}{\\{g(x)\\}^2}\\)", "\\(\\tfrac{g(x)f'(x)-f(x)g'(x)}{[g(x)]^2}\\)", "\\(f(x)g'(x)+g(x)f'(x)\\)"], "a": 2, "id": 32, "paper": "NED 2023"}, {"q": "For any matrix \\(A^t=A\\) (if \\(A\\) is a square matrix) then matrix is said to be", "o": ["Symmetric", "Skew Symmetric", "Null", "Diagonal"], "a": 0, "id": 33, "paper": "NED 2023"}, {"q": "If \\(\\dfrac{\\sin^2x}{\\cos^2x}=1\\) then the value of \\(\\tan x=\\) ?", "o": ["\\(\\pm1\\)", "−1", "0", "−3"], "a": 0, "id": 34, "paper": "NED 2023"}, {"q": "If \\(P(A)=\\tfrac12,\\ P(B)=\\tfrac14,\\ P(A\\cap B)=\\tfrac18\\), then \\(P(A\\cup B)=\\)?", "o": ["\\(\\tfrac58\\)", "\\(\\tfrac78\\)", "\\(\\tfrac38\\)", "\\(\\tfrac85\\)"], "a": 0, "id": 35, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int x\\cot x^2\\,dx\\)", "o": ["\\(\\ln\\sin x^2+c\\)", "\\(\\tfrac12\\ln(\\sin x^2)+c\\)", "\\(2\\ln(\\sin x^2)+c\\)", "None"], "a": 1, "id": 36, "paper": "NED 2023"}, {"q": "How many terms of the series \\(-8,-6,-4,\\dots\\) will make the sum 90?", "o": ["14", "15", "16", "17"], "a": 1, "id": 37, "paper": "NED 2023"}, {"q": "The first three terms of G.P are \\(x+10,\\ x-2,\\ x-10\\). The value of \\(x\\) and sum to infinity is", "o": ["26, 108", "26, 106", "26, 110", "26, 105"], "a": 0, "id": 38, "paper": "NED 2023"}, {"q": "\\(y^2-6y-8x-23=0\\) then vertex of the given equation is", "o": ["\\((-4,3)\\)", "\\((4,3)\\)", "\\((-4,-3)\\)", "\\((4,-3)\\)"], "a": 0, "id": 39, "paper": "NED 2023"}, {"q": "\\(x^2=-4y\\), then equation of directrix and axis of parabola is", "o": ["\\(y=1,\\ x=0\\)", "\\(y=-1,\\ x=0\\)", "\\(y=0,\\ x=1\\)", "None"], "a": 0, "id": 40, "paper": "NED 2023"}, {"q": "Two dice are tossed together; the probability of getting same faces", "o": ["\\(\\tfrac15\\)", "\\(\\tfrac16\\)", "\\(\\tfrac56\\)", "\\(\\tfrac76\\)"], "a": 1, "id": 41, "paper": "NED 2023"}, {"q": "When a vector is divided by its magnitude then vector is said to be", "o": ["Unit Vector", "Position Vector", "Null Vector", "Free Vector"], "a": 0, "id": 42, "paper": "NED 2023"}, {"q": "\\(A+(B+C)=(A+B)+C\\) — this property is said to be", "o": ["Associative", "Commutative", "Distributive", "None"], "a": 0, "id": 43, "paper": "NED 2023"}, {"q": "The product of A.M and H.M between two numbers is", "o": ["\\(G^2\\)", "\\(A^2\\)", "\\(H^2\\)", "\\(GH\\)"], "a": 0, "id": 44, "paper": "NED 2023"}, {"q": "\\(0!\\) and \\(1!\\) are", "o": ["0", "1", "2", "\\(\\pm1\\)"], "a": 1, "id": 45, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}a^x=\\) ?", "o": ["\\(\\tfrac{a^x}{\\ln a}\\)", "\\(a^x\\ln a\\)", "\\(a^x\\)", "\\(a^{x-1}\\)"], "a": 1, "id": 46, "paper": "NED 2023"}, {"q": "If \\(16^x=4\\) and \\(5^{x+y}=625\\) then \\(y=\\) ?", "o": ["\\(\\tfrac52\\)", "\\(\\tfrac12\\)", "\\(\\tfrac72\\)", "\\(\\tfrac92\\)"], "a": 2, "id": 47, "paper": "NED 2023"}, {"q": "If \\(A^2=A\\) then matrix \\(A\\) is said to be", "o": ["Idempotent", "Null", "Symmetric", "Diagonal"], "a": 0, "id": 48, "paper": "NED 2023"}, {"q": "\\(\\dfrac{\\cos^4\\theta-\\sin^4\\theta}{\\cos^2\\theta-\\sin^2\\theta}=\\) ?", "o": ["\\(\\cos^2\\theta\\)", "\\(\\sin^2\\theta\\)", "\\(\\tan^2\\theta\\)", "1"], "a": 3, "id": 49, "paper": "NED 2023"}, {"q": "If one row of any square matrix is zero then determinant of matrix will be", "o": ["1", "−1", "0", "None"], "a": 2, "id": 50, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int e^x(x^2+2x)\\,dx=\\) ?", "o": ["\\(e^x x^2+c\\)", "\\(e^x 2x+c\\)", "\\(e^x x^2+2x+c\\)", "None"], "a": 0, "id": 51, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}(\\tan^{-1}x)^2=\\) ?", "o": ["\\(2\\tan^{-1}x\\)", "\\(\\tfrac{2\\tan^{-1}x}{1+x^2}\\)", "\\(\\tfrac{-2\\tan^{-1}x}{1+x^2}\\)", "\\(\\tfrac{1+x^2}{2\\tan^{-1}x}\\)"], "a": 1, "id": 52, "paper": "NED 2023"}, {"q": "If the equation \\(ax^2+bx+c=0\\) has complex roots then", "o": ["\\(b^2-4ac=0\\)", "\\(b^2-4ac>0\\)", "\\(b^2-4ac<0\\)", "\\(b^2-4ac\\ge0\\)"], "a": 2, "id": 53, "paper": "NED 2023"}, {"q": "If \\(\\alpha,\\beta\\) are the roots of \\(2x^2-5x+4=0\\) then the value of \\((\\alpha+1)(\\beta+1)=\\) ?", "o": ["\\(\\tfrac72\\)", "\\(\\tfrac{11}{2}\\)", "\\(\\tfrac{-11}{2}\\)", "\\(\\tfrac{2}{11}\\)"], "a": 1, "id": 54, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_0^{\\pi/2}\\sin^3x\\cos x\\,dx\\)", "o": ["\\(\\tfrac13\\)", "\\(\\tfrac14\\)", "\\(\\tfrac15\\)", "\\(-\\tfrac14\\)"], "a": 1, "id": 55, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\,e^{\\sin x}\\cos x\\)", "o": ["\\(e^{\\sin x}(\\cos x+\\sin x)\\)", "\\(e^{\\sin x}(\\cos x-\\sin x)\\)", "\\(e^{\\sin x}(-\\cos x-\\sin x)\\)", "None — true value is \\(e^{\\sin x}(\\cos^2x-\\sin x)\\)"], "a": 3, "u": "Correct derivative is \\(e^{\\sin x}(\\cos^2x-\\sin x)\\); not listed in A–C, so D.", "id": 56, "paper": "NED 2023"}, {"q": "If \\(A=\\begin{bmatrix}1&0&0\\\\1&\\omega&0\\\\1&1&\\omega^2\\end{bmatrix}\\) then \\(|A|=\\) ?", "o": ["−1", "1", "0", "−1"], "a": 1, "id": 57, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}\\dfrac{\\tan x}{x}=\\) ?", "o": ["\\(\\infty\\)", "1", "0", "−1"], "a": 1, "id": 58, "paper": "NED 2023"}, {"q": "If \\(P(A)=\\tfrac13,\\ P(B)=\\tfrac13,\\ P(A\\cap B)=\\tfrac19\\) then \\((A\\cup B)'=\\) ?", "o": ["\\(\\tfrac59\\)", "\\(\\tfrac49\\)", "\\(\\tfrac19\\)", "\\(\\tfrac{-7}{9}\\)"], "a": 1, "id": 59, "paper": "NED 2023"}, {"q": "The term independent of \\(x\\) in the expression \\(\\left(x^2-\\dfrac{2}{x^2}\\right)^{12}\\)", "o": ["−8064", "−59136", "59136", "8064"], "a": 2, "id": 60, "paper": "NED 2023"}, {"q": "\\(3x^2+y^2-6x=0\\) then slope is", "o": ["\\(\\tfrac{6x}{2y}\\)", "\\(\\tfrac{6x-6}{2y}\\)", "\\(-\\left(\\tfrac{6x-6}{2y}\\right)\\)", "None"], "a": 2, "id": 61, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\ln(\\sin x)=\\) ?", "o": ["\\(\\tan x\\)", "\\(\\cot x\\)", "\\(-\\tan x\\)", "\\(-\\cot x\\)"], "a": 1, "id": 62, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\ln(1+x^2)=\\) ?", "o": ["\\(\\tfrac{1+x^2}{2x}\\)", "\\(\\tfrac{2x}{1+x^2}\\)", "\\(\\tfrac{-1+x^2}{2x}\\)", "\\(\\tfrac{-1-x^2}{2x}\\)"], "a": 1, "id": 63, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to\\infty}\\dfrac{x^3}{x^2+x+1}=\\) ?", "o": ["1", "0", "\\(\\infty\\)", "−1"], "a": 2, "id": 64, "paper": "NED 2023"}, {"q": "If the discriminant of quadratic equation is −4 the root of equation is", "o": ["Real", "Equal", "Complex", "None"], "a": 2, "id": 65, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\left(\\sqrt{x}+\\dfrac{1}{\\sqrt{x}}\\right)^2\\)", "o": ["\\(1+\\tfrac{1}{x^2}\\)", "\\(1-\\tfrac{1}{x^2}\\)", "\\(1+x^2\\)", "\\(1+\\tfrac1x\\)"], "a": 1, "id": 66, "paper": "NED 2023"}, {"q": "If \\(f(x)=x^7-99x^6+99x^4-2x+190\\) then \\(f(99)=\\) ?", "o": ["10", "4", "−2", "None"], "a": 3, "u": "Source polynomial appears garbled (OCR); value not cleanly reconstructable. Marked None.", "id": 67, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_0^{\\pi/2}\\cos^4x\\,dx\\)", "o": ["\\(\\tfrac{\\pi}{2}\\)", "\\(\\tfrac{3\\pi}{16}\\)", "\\(\\tfrac{3\\pi}{4}\\)", "\\(\\tfrac{7\\pi}{8}\\)"], "a": 1, "id": 68, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{e^{1/u}}{u^2}+c\\)", "o": ["\\(e^{1/u}+c\\)", "\\(-e^{1/u}+c\\)", "\\(\\tfrac{e^{1/u}}{2}+c\\)", "None"], "a": 1, "id": 69, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to\\infty}\\dfrac{x^2-2x+3}{5x^2+7x+4}\\)", "o": ["\\(-\\tfrac15\\)", "\\(\\tfrac15\\)", "0", "\\(\\infty\\)"], "a": 1, "id": 70, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\,a\\sin^{-1}\\!\\left(\\dfrac{x}{a}\\right)\\)", "o": ["\\(\\tfrac{a}{\\sqrt{a^2-x^2}}\\)", "\\(\\tfrac{-a}{\\sqrt{a^2-x^2}}\\)", "\\(\\tfrac{1}{\\sqrt{a^2-x^2}}\\)", "\\(\\tfrac{-1}{\\sqrt{1-x^2}}\\)"], "a": 0, "id": 71, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{x^2\\,dx}{e^{2x^3+3}}\\)", "o": ["\\(\\tfrac16 e^{2x^3+3}+c\\)", "\\(\\tfrac16 e^{-2x^3-3}+c\\)", "\\(\\tfrac{-1}{6}\\cdot\\tfrac{1}{e^{2x^3+3}}+c\\)", "\\(\\tfrac{1}{6e^{2x^3+3}}+c\\)"], "a": 2, "id": 72, "paper": "NED 2023"}, {"q": "Eccentricity of parabola is", "o": ["0", "1", "1.5", "0.5"], "a": 1, "id": 73, "paper": "NED 2023"}, {"q": "\\(\\dfrac{2+5i}{1-i}=x-yi\\) then the value of \\(x-yi\\)", "o": ["\\(\\tfrac{-3+7i}{2}\\)", "\\(\\tfrac{-3-7i}{2}\\)", "\\(\\tfrac{3+7i}{2}\\)", "None"], "a": 0, "id": 74, "paper": "NED 2023"}, {"q": "If eccentricity is \\(\\tfrac32\\) then conic is", "o": ["Circle", "parabola", "hyperbola", "ellipse"], "a": 2, "id": 75, "paper": "NED 2023"}, {"q": "Pythagoras Theorem relates to which law?", "o": ["Law of sine", "Law of cosine", "Law of Tangent", "None"], "a": 1, "id": 76, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_0^{\\pi/2}\\cos^4(x)\\,dx=\\) ?", "o": ["\\(\\tfrac{\\pi}{2}\\)", "0", "−1", "None"], "a": 3, "u": "True value \\(\\tfrac{3\\pi}{16}\\) is not among A–C, so None.", "id": 77, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int a^{4x}\\,dx=\\) ?", "o": ["\\(\\tfrac{a^{4x}}{\\ln a}+c\\)", "\\(\\tfrac{a^{4x}}{4\\ln a}+c\\)", "\\(\\tfrac{-a^{4x}}{\\ln a}+c\\)", "\\(a^{4x}+c\\)"], "a": 1, "id": 78, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}x^x=\\) ?", "o": ["1", "−1", "0", "Not defined"], "a": 0, "id": 79, "paper": "NED 2023"}, {"q": "\\(y=x^{\\cos x}\\) then \\(y'=\\) ?", "o": ["\\(\\left(\\tfrac{\\cos x}{x}-\\ln x\\sin x\\right)\\)", "\\(\\left(\\tfrac{\\cos x}{x}-\\ln x\\sin x\\right)x^{\\cos x}\\)", "\\(\\left(\\tfrac{\\cos x}{x}+\\ln x\\sin x\\right)\\)", "\\(\\left(\\tfrac{\\cos x}{x}+\\tfrac{\\ln\\sin x}{\\sin x}\\right)x^{\\cos x}\\)"], "a": 1, "id": 80, "paper": "NED 2023"}, {"q": "\\(f(x)=\\tan^{-1}x\\sin x\\), \\(f'(x)=\\) ?", "o": ["\\(\\tfrac{1}{1+x^2}\\cos x\\)", "\\(\\tan^{-1}x\\cos x+\\tfrac{\\sin x}{1+x^2}\\)", "\\(\\tan^{-1}x\\cos x-\\tfrac{\\sin x}{1+x^2}\\)", "None"], "a": 1, "id": 81, "paper": "NED 2023"}, {"q": "\\(\\dfrac{1}{1-\\sin\\theta}-\\dfrac{1}{1+\\sin\\theta}=\\) ?", "o": ["\\(2\\tan\\theta\\)", "\\(2\\tan\\theta\\sec\\theta\\)", "\\(2\\tan\\theta\\cos\\theta\\)", "\\(2\\sec\\theta\\)"], "a": 1, "id": 82, "paper": "NED 2023"}, {"q": "\\(y=\\dfrac{e^x-1}{e^x+1}\\), \\(\\dfrac{dy}{dx}=\\) ?", "o": ["\\(\\tfrac{e^x-1}{(e^x+1)^2}\\)", "\\(\\tfrac{2e^x}{(e^x+1)^2}\\)", "\\(\\tfrac{(e^x+1)(e^x)}{(e^x+1)^2}\\)", "\\(\\tfrac{-2e^x}{(e^x+1)^2}\\)"], "a": 1, "id": 83, "paper": "NED 2023"}, {"q": "Equation of ellipse when centre is at origin, minor axis along \\(x\\)-axis and length of major axis is 10 and distance b/w foci is 8", "o": ["\\(\\tfrac{x^2}{9}+\\tfrac{y^2}{25}=1\\)", "\\(\\tfrac{x^2}{9}+\\tfrac{y^2}{16}=1\\)", "\\(\\tfrac{x^2}{25}+\\tfrac{y^2}{9}=1\\)", "None"], "a": 0, "id": 84, "paper": "NED 2023"}, {"q": "Eccentricity of \\(16x^2+9y^2-64x-54y+1=0\\)", "o": ["\\(\\tfrac{\\sqrt7}{4}\\)", "\\(\\tfrac12\\)", "\\(\\tfrac23\\)", "0.7"], "a": 0, "id": 85, "paper": "NED 2023"}, {"q": "Equation of circle passes through \\((3,0)\\) & \\((0,3)\\) and touches both axis", "o": ["\\(x^2+y^2-6x-6y+9=0\\)", "\\(x^2+y^2-6x-6y=0\\)", "\\(x^2+y^2-6x+6y=0\\)", "None"], "a": 0, "id": 86, "paper": "NED 2023"}, {"q": "If \\(2x-3,\\ x,\\ x-2\\) be the series in G.P then sum to infinity is", "o": ["20.1", "20", "39.1", "None"], "a": 3, "u": "Valid GP gives \\(x=6\\Rightarrow S_\\infty=27\\); not listed, so None.", "id": 87, "paper": "NED 2023"}, {"q": "\\((\\cos\\theta+i\\sin\\theta)^n\\) — correct statement (De Moivre)", "o": ["\\(\\cos\\theta+i\\sin n\\theta\\)", "\\(\\cos\\theta+i\\sin\\theta\\)", "\\(\\cos n\\theta+i\\sin n\\theta\\)", "\\(\\cos\\theta-i\\sin\\theta\\)"], "a": 2, "id": 88, "paper": "NED 2023"}, {"q": "\\(2^3\\,2^2=2^k\\) then k is", "o": ["5", "4", "3", "2"], "a": 0, "id": 89, "paper": "NED 2023"}, {"q": "\\(x=2a,\\ 2^a=2^5\\); the value of \\(x\\) is", "o": ["−10", "10", "20", "−20"], "a": 1, "id": 90, "paper": "NED 2023"}, {"q": "\\(\\cos10^\\circ\\cos20^\\circ-\\sin10^\\circ\\sin20^\\circ=\\) ?", "o": ["\\(\\tfrac12\\)", "\\(\\tfrac{\\sqrt3}{2}\\)", "\\(\\sqrt3\\)", "\\(\\tfrac{1}{\\sqrt3}\\)"], "a": 1, "id": 91, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to a}\\dfrac{x^n-a^n}{x-a}=\\) ?", "o": ["\\(nx^{n-1}\\)", "\\(na^{n-1}\\)", "\\(na\\)", "\\(na\\)"], "a": 1, "id": 92, "paper": "NED 2023"}, {"q": "\\(y=e^{x^2}\\), \\(\\dfrac{dy}{dx}=\\) ?", "o": ["\\(e^{x^2}\\)", "\\(e^{x^2}\\,2x\\)", "\\(e^{x^2}\\,2e\\)", "None"], "a": 1, "id": 93, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{2x\\,dx}{1+x^2}\\)", "o": ["\\((1+x^2)+c\\)", "\\(\\ln(1+x^2)+c\\)", "\\(\\ln 2x+c\\)", "\\(-\\ln(1+x^2)+c\\)"], "a": 1, "id": 94, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_1^e \\ln x\\,dx\\)", "o": ["0", "1", "−1", "2"], "a": 1, "id": 95, "paper": "NED 2023"}, {"q": "\\(f(x)=\\sin x^3\\) then \\(f'(x)\\) is:", "o": ["\\(\\cos x^3\\)", "\\(3x^2\\cos x^3\\)", "\\(-3x^2\\cos x^3\\)", "None"], "a": 1, "id": 96, "paper": "NED 2023"}, {"q": "\\((1+\\omega+\\omega^2)^2\\) where \\(\\omega\\) is the complex cube root of unity", "o": ["0", "1", "−1", "\\(=\\omega\\)"], "a": 0, "id": 97, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{dx}{a^2+x^2}=\\) ?", "o": ["\\(\\tan^{-1}x+c\\)", "\\(\\tfrac1a\\tan^{-1}\\!\\left(\\tfrac{x}{a}\\right)+c\\)", "\\(\\tan^{-1}\\!\\left(\\tfrac{x}{a}\\right)+c\\)", "None"], "a": 1, "id": 98, "paper": "NED 2023"}, {"q": "\\(\\omega^{32}=\\) ?", "o": ["\\(\\omega\\)", "\\(\\omega^2\\)", "1", "0"], "a": 1, "id": 99, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int e^{\\tan x}\\sec^2x\\,dx\\)", "o": ["\\(e^{\\tan x}+c\\)", "\\(\\tfrac{e^{\\tan x}}{\\sec^2x}+c\\)", "\\(e^{\\tan x}\\,2x+c\\)", "None"], "a": 0, "id": 100, "paper": "NED 2023"}, {"q": "Harmonic mean between \\(P\\) & \\(q\\)", "o": ["\\(\\tfrac{P+q}{2}\\)", "\\(\\tfrac{2Pq}{P+q}\\)", "\\(\\sqrt{Pq}\\)", "None"], "a": 1, "id": 101, "paper": "NED 2023"}, {"q": "\\(\\cos\\dfrac{x}{2}=\\) ?", "o": ["\\(\\tfrac{1+\\cos x}{2}\\)", "\\(\\tfrac{1-\\cos x}{2}\\)", "\\(\\sqrt{\\tfrac{1+\\cos x}{2}}\\)", "\\(\\sqrt{\\tfrac{1-\\cos x}{2}}\\)"], "a": 2, "id": 102, "paper": "NED 2023"}, {"q": "\\(S_1=t^3-2t+1,\\ S_2=t^2+5t+5\\); find the difference of velocity at \\(t=2\\) sec", "o": ["1", "−1", "2", "0"], "a": 0, "id": 103, "paper": "NED 2023"}, {"q": "\\(\\sqrt{y}-e^x=2\\) then \\(\\dfrac{dy}{dx}=\\) ?", "o": ["\\(\\tfrac{e^x}{2\\sqrt{y}}\\)", "\\(e^x\\,2\\sqrt{y}\\)", "\\(\\tfrac{e^x}{2}\\)", "None"], "a": 1, "id": 104, "paper": "NED 2023"}, {"q": "\\((5x-2)+(5y-8)i=3x+(2y-2)i\\) then \\(x\\) & \\(y\\) is", "o": ["\\((-1,-2)\\)", "\\((-1,2)\\)", "\\((1,2)\\)", "\\((2,1)\\)"], "a": 2, "id": 105, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_0^\\pi \\sqrt{1-\\cos x}\\,dx\\)", "o": ["\\(\\sqrt2\\)", "\\(2\\sqrt2\\)", "\\(-2\\sqrt2\\)", "None"], "a": 1, "id": 106, "paper": "NED 2023"}, {"q": "In an A.P \\(T_4=4\\) & \\(T_{22}=5\\) then \\(T_{19}=\\) ?", "o": ["\\(\\tfrac{29}{6}\\)", "\\(\\tfrac{27}{6}\\)", "\\(\\tfrac{6}{29}\\)", "\\(\\tfrac{6}{27}\\)"], "a": 0, "id": 107, "paper": "NED 2023"}, {"q": "In a G.P \\(a=7\\) and \\(T_n=448\\) & \\(S_n=889\\) then \\(r=\\) ?", "o": ["0", "3", "4", "None"], "a": 3, "u": "Correct ratio \\(r=2\\) is not listed, so None.", "id": 108, "paper": "NED 2023"}, {"q": "\\(x^2+y^2-4x-6y+9=0\\) then centre is", "o": ["\\((2,-3)\\)", "\\((2,3)\\)", "\\((-2,-3)\\)", "\\((3,2)\\)"], "a": 1, "id": 109, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_1^3 f(x)\\,dx=3\\) then \\(\\displaystyle\\int_1^3 5f(x)\\,dx=\\) ?", "o": ["12", "15", "18", "21"], "a": 1, "id": 110, "paper": "NED 2023"}, {"q": "\\(\\dfrac{x-2}{x+2}+\\dfrac{x+2}{x-2}=\\dfrac{34}{15}\\) then solution of equation is", "o": ["8", "−8", "6", "a & b"], "a": 3, "id": 111, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{dx}{a^2-x^2}=\\) ?", "o": ["\\(\\tfrac{1}{2a}\\ln\\!\\left(\\tfrac{x-1}{x+1}\\right)+c\\)", "\\(\\tfrac{1}{2a}\\ln\\!\\left(\\tfrac{x+a}{x-a}\\right)+c\\)", "\\(\\tfrac{1}{2a}\\ln\\!\\left(\\tfrac{x-1}{x+1}\\right)+c\\)", "None"], "a": 3, "u": "Standard answer \\(\\tfrac{1}{2a}\\ln\\!\\big|\\tfrac{a+x}{a-x}\\big|\\); not matched by A–C, so None.", "id": 112, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int x\\cot^2 x\\,dx\\) (i.e. \\(\\int x\\cot x^2\\,dx\\))", "o": ["\\(\\tfrac12\\ln|\\sin x^2|+c\\)", "\\(\\ln\\sin x^2+c\\)", "\\(2\\ln\\sin x^2+c\\)", "None"], "a": 0, "id": 113, "paper": "NED 2023"}, {"q": "If \\(A^{k+1}=A\\) and \\(k\\) is a positive integer then it is", "o": ["Periodic", "Null", "Idempotent", "None"], "a": 0, "id": 114, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\tan^{-1}x\\,dx\\)", "o": ["\\(x\\tan^{-1}x-\\tfrac12\\ln(1+x^2)+c\\)", "\\(x\\tan^{-1}x-\\ln\\sqrt{1+x^2}+c\\)", "Both a & b", "None"], "a": 2, "id": 115, "paper": "NED 2023"}, {"q": "For the equation of Hyperbola \\(2x^2-y^2=16\\) then its focus", "o": ["\\((0,\\pm2\\sqrt6)\\)", "\\((\\pm2\\sqrt6,0)\\)", "\\((\\pm\\sqrt6,0)\\)", "\\((0,\\pm\\sqrt6)\\)"], "a": 1, "id": 116, "paper": "NED 2023"}, {"q": "A diagonal matrix in which all the diagonal elements are equal to one is", "o": ["Unit / Identity", "Null Matrix", "Periodic Matrix", "None"], "a": 0, "id": 117, "paper": "NED 2023"}, {"q": "If \\((0,1),(x,1),(2,3)\\) are collinear then the value of \\(x\\) is", "o": ["1", "−1", "−2", "0"], "a": 3, "id": 118, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int x^5 e^{7-4x^6}\\,dx\\)", "o": ["\\(e^{7-4x^6}+c\\)", "\\(-\\tfrac{1}{24}e^{7-4x^6}+c\\)", "\\(-\\tfrac14 e^{7-4x^6}+c\\)", "None"], "a": 1, "id": 119, "paper": "NED 2023"}, {"q": "\\(\\sqrt{\\dfrac{S(S-a)}{bc}}=\\) ?", "o": ["\\(\\cos\\tfrac{\\alpha}{2}\\)", "\\(\\sin\\tfrac{x}{2}\\)", "\\(\\tan\\tfrac{x}{2}\\)", "\\(\\Delta R\\)"], "a": 0, "id": 120, "paper": "NED 2023"}, {"q": "The equation of Hyperbola \\(9x^2-16y^2=144\\); equation of asymptotes is", "o": ["\\(y=\\pm\\tfrac43 x\\)", "\\(y=\\pm\\tfrac34 x\\)", "\\(y=\\pm\\tfrac{16}{3}x\\)", "\\(y=\\pm\\tfrac{3}{16}x\\)"], "a": 1, "id": 121, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to\\infty}\\dfrac{\\ln x}{x}=\\) ?", "o": ["1", "0", "−1", "−2"], "a": 1, "id": 122, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int (2x+5)^2\\,dx=\\) ?", "o": ["\\(\\tfrac{(2x+5)^3}{6}+c\\)", "\\(\\tfrac{(2x+5)^4}{8}+c\\)", "\\((2x+5)^3+c\\)", "None"], "a": 0, "id": 123, "paper": "NED 2023"}, {"q": "\\(\\sin\\theta+\\cos\\theta\\cot\\theta=\\) ?", "o": ["\\(\\sin\\theta\\)", "\\(\\operatorname{cosec}\\theta\\)", "\\(\\sec\\theta\\)", "\\(\\tan\\theta\\)"], "a": 1, "id": 124, "paper": "NED 2023"}, {"q": "If the line passes through origin and has a gradient \\(\\infty\\) then equation is", "o": ["\\(y=0\\)", "\\(x=0\\)", "\\(y=1\\)", "\\(x=1\\)"], "a": 1, "id": 125, "paper": "NED 2023"}, {"q": "\\(\\dfrac{x^3-3x^2+5x-6}{x-2}=\\) ?", "o": ["\\(x^2-x+3\\)", "\\(x-3\\)", "\\(x+3\\)", "\\(x^2+3\\)"], "a": 0, "id": 126, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{dx}{ax+b}=\\) ?", "o": ["\\(\\ln(ax+b)+c\\)", "\\(\\tfrac{\\ln(ax+b)}{2}+c\\)", "\\(\\tfrac1a\\ln(ax+b)+c\\)", "None"], "a": 2, "id": 127, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{dx}{9+x^2}=\\) ?", "o": ["\\(\\tfrac13\\tan^{-1}\\!\\left(\\tfrac{x}{3}\\right)+c\\)", "\\(\\tan^{-1}\\!\\left(\\tfrac{x}{3}\\right)+c\\)", "\\(\\tfrac13\\tan^{-1}(x)+c\\)", "None"], "a": 0, "id": 128, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to\\pi/2}\\dfrac{\\cos x}{x^2}=\\) ?", "o": ["\\(\\tfrac{\\pi}{2}\\)", "0", "1", "−1"], "a": 1, "id": 129, "paper": "NED 2023"}, {"q": "\\(\\cos3x=\\tfrac12\\) then solution is", "o": ["\\(\\operatorname{Arc}\\cos\\!\\left(\\tfrac12\\right)\\)", "\\(\\tfrac13\\operatorname{Arc}\\cos\\!\\left(\\tfrac12\\right)\\)", "\\(\\cos\\!\\left(\\tfrac12\\right)\\)", "\\(\\cos^{-1}\\!\\left(\\tfrac12\\right)\\)"], "a": 1, "id": 130, "paper": "NED 2023"}, {"q": "Middle term of \\(x^2+\\dfrac{16}{25}\\) (to be a perfect square) is", "o": ["\\(\\pm\\tfrac{8x}{5}\\)", "\\(\\tfrac{8x}{5}\\)", "\\(\\tfrac{-8x}{5}\\)", "None"], "a": 0, "id": 131, "paper": "NED 2023"}, {"q": "\\(\\dfrac{\\cos\\theta}{\\tan\\theta\\sin\\theta}=\\) ?", "o": ["\\(\\tfrac{1}{\\tan^2\\theta}\\)", "\\(\\tfrac{1}{\\cot^2\\theta}\\)", "\\(\\tfrac{1}{\\sin^2\\theta}\\)", "\\(\\tfrac{1}{\\sec^2\\theta}\\)"], "a": 0, "id": 132, "paper": "NED 2023"}, {"q": "Lotus Rectum of Parabola \\(y^2=4ax\\)", "o": ["\\(|4a|\\)", "\\(|6a|\\)", "\\(|12a|\\)", "None"], "a": 0, "id": 133, "paper": "NED 2023"}, {"q": "Solve for \\(x\\): \\(\\begin{vmatrix}1&a&b\\\\1&x&b\\\\1&c&x\\end{vmatrix}=0\\)", "o": ["\\((a,b)\\)", "\\((a^2,a)\\)", "\\((a^2,b^2)\\)", "\\((b,b^2)\\)"], "a": 0, "id": 134, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}\\dfrac{\\sin5x-\\sin3x}{x}\\)", "o": ["−2", "2", "1", "−1"], "a": 1, "id": 135, "paper": "NED 2023"}, {"q": "\\(Z\\cdot\\overline{Z}=\\) ? (\\(Z\\) complex, \\(\\overline{Z}\\) its conjugate)", "o": ["\\(|Z|^2\\)", "\\(|\\overline{Z}|^2\\)", "\\(Z^2\\)", "Both a & b"], "a": 3, "id": 136, "paper": "NED 2023"}, {"q": "\\(\\sqrt{x+3}+\\sqrt{x+5}=\\sqrt{12x+13}\\) is", "o": ["Reciprocal Equation", "Exponential Equation", "Radical Equation", "None"], "a": 2, "id": 137, "paper": "NED 2023"}, {"q": "\\(4^{1+x}+4^{1-x}=10\\) is", "o": ["Radical equation", "Exponential equation", "Reciprocal equation", "None"], "a": 1, "id": 138, "paper": "NED 2023"}, {"q": "Partial fraction of \\(\\dfrac{1}{x^3-x}\\) is", "o": ["\\(\\tfrac{A}{x}+\\tfrac{B}{x^2-1}\\)", "\\(\\tfrac{A}{x}+\\tfrac{B}{x-1}+\\tfrac{C}{x+1}\\)", "\\(\\tfrac{A}{x}-\\tfrac{B}{x-1}\\)", "\\(\\tfrac{A}{x}+\\tfrac{B}{x-1}-\\tfrac{C}{x+1}\\)"], "a": 1, "id": 139, "paper": "NED 2023"}, {"q": "Partial fraction of \\(\\dfrac{1}{(x^2-1)(x-3)}\\) is", "o": ["\\(\\tfrac{A}{x-1}+\\tfrac{B}{x-3}\\)", "\\(\\tfrac{A}{x^2-1}+\\tfrac{B}{x-3}\\)", "\\(\\tfrac{A}{x-1}+\\tfrac{B}{x+1}+\\tfrac{C}{x-3}\\)", "None"], "a": 2, "id": 140, "paper": "NED 2023"}, {"q": "From the deck of 52 playing cards probability of two red kings is", "o": ["\\(\\tfrac{1}{22}\\)", "\\(\\tfrac{1}{52}\\)", "\\(\\tfrac{1}{26}\\)", "\\(\\tfrac{1}{221}\\)"], "a": 3, "u": "For two red kings \\(=\\tfrac{1}{1326}\\); listed option matches 'two kings' \\(=\\tfrac{1}{221}\\).", "id": 141, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}\\dfrac{\\cot x}{\\cot 2x}=\\) ?", "o": ["0", "1", "−1", "None"], "a": 3, "u": "Limit \\(=2\\); not among A–C, so None.", "id": 142, "paper": "NED 2023"}, {"q": "Let \\(A=\\begin{bmatrix}2&-2&0\\\\-3&1&2\\\\1&-3&1\\end{bmatrix}\\); if \\(|A|=12\\) and \\(B\\) is the transpose of \\(A\\) then \\(|B|=\\) ?", "o": ["\\(\\tfrac{1}{12}\\)", "12", "−12", "None"], "a": 1, "id": 143, "paper": "NED 2023"}, {"q": "\\(\\left(2+\\dfrac{x}{2}\\right)^9\\) then the coefficient of sixth term is", "o": ["64", "63", "62", "65"], "a": 1, "id": 144, "paper": "NED 2023"}, {"q": "\\(y=2x+\\dfrac1x\\) then slope at \\((1,3)\\) is", "o": ["0", "1", "−1", "−3"], "a": 1, "id": 145, "paper": "NED 2023"}, {"q": "If a circle passes through all these vertices of a triangle then the circle is", "o": ["Circum circle", "In Circle", "Ex-Circle", "None"], "a": 0, "id": 146, "paper": "NED 2023"}, {"q": "The equation of circle whose diameter is the line joining the points \\((2,1)\\) and \\((6,5)\\)", "o": ["\\(x^2+y^2-4x-3y+17=0\\)", "\\(x^2+y^2+8x-y+17=0\\)", "\\(x^2+y^2-8x-6y+17=0\\)", "\\(x^2+y^2+8x-6y+17=0\\)"], "a": 2, "id": 147, "paper": "NED 2023"}, {"q": "If \\(\\cos x=\\tfrac34\\) then the value of \\(\\sin x\\) if both functions are in 1st quadrant.", "o": ["\\(\\tfrac{\\sqrt7}{4}\\)", "\\(\\tfrac{-\\sqrt7}{4}\\)", "\\(\\tfrac{4}{\\sqrt7}\\)", "\\(\\tfrac{-4}{\\sqrt7}\\)"], "a": 0, "id": 148, "paper": "NED 2023"}, {"q": "How many numbers are there between 256 and 789 that are divisible by 7?", "o": ["74", "75", "76", "78"], "a": 2, "id": 149, "paper": "NED 2023"}, {"q": "Find the value of \\(b\\) so that \\(2i-3j,\\ bj+i+k,\\ 3i-k\\) are coplanar.", "o": ["−6", "−1", "0", "none"], "a": 0, "id": 150, "paper": "NED 2023"}, {"q": "For parabola vertex at origin and passing through \\((20,-16)\\) and symmetric about \\(y\\)-axis", "o": ["\\(x^2=25y\\)", "\\(x^2=-25y\\)", "\\(x^2=4y\\)", "None"], "a": 1, "id": 151, "paper": "NED 2023"}, {"q": "If \\(-4\\) and \\(8\\) are the roots of quadratic equation, then equation is", "o": ["\\(x^2-4x+32=0\\)", "\\(x^2-4x-32=0\\)", "\\(x^2+4x-32=0\\)", "None"], "a": 1, "id": 152, "paper": "NED 2023"}, {"q": "How many different arrangements of the word \\\"REARRANGE\\\"", "o": ["\\(\\tfrac{9!}{3!\\,2!\\,2!}\\)", "\\(9!\\)", "\\(\\tfrac{9!}{3!}\\)", "\\(\\tfrac{9!}{3!\\,2!}\\)"], "a": 0, "id": 153, "paper": "NED 2023"}, {"q": "If 4 A.M's are inserted between \\((a-b)\\) & \\((9a+11b)\\) then the fourth A.M will be", "o": ["\\(\\tfrac{13a+7b}{3}\\)", "\\(\\tfrac{21a+19b}{5}\\)", "\\(\\tfrac{37a+43b}{5}\\)", "None"], "a": 2, "id": 154, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\tan2x\\,dx\\)", "o": ["\\(\\ln\\sec2x+c\\)", "\\(\\tfrac{\\ln\\sec2x}{2}+c\\)", "\\(-\\ln\\sec2x+c\\)", "None"], "a": 1, "id": 155, "paper": "NED 2023"}, {"q": "The equation of perpendicular bisector of segment joining \\((5,4)\\) and \\((-4,-2)\\)", "o": ["\\(6x+4y-7=0\\)", "\\(6x+4y+7=0\\)", "\\(6x-4y+7=0\\)", "None"], "a": 0, "id": 156, "paper": "NED 2023"}, {"q": "\\(f(x)=\\sin x\\); \\(f''(x)\\) is", "o": ["\\(-\\sin x\\)", "\\(\\cos x\\)", "\\(\\sin x\\)", "\\(\\tan x\\)"], "a": 0, "id": 157, "paper": "NED 2023"}, {"q": "\\(f(x)=\\cos x\\); \\(f''\\!\\left(\\tfrac{\\pi}{2}\\right)=\\) ?", "o": ["1", "0", "−1", "2"], "a": 1, "id": 158, "paper": "NED 2023"}, {"q": "\\(i^4=\\) ?", "o": ["\\(i\\)", "1", "−1", "\\(-i\\)"], "a": 1, "id": 159, "paper": "NED 2023"}, {"q": "\\(i^{16}+i^{32}+i^{67}=\\) ?", "o": ["\\(2-i\\)", "\\(2+i\\)", "\\(i\\)", "\\(-i\\)"], "a": 0, "id": 160, "paper": "NED 2023"}, {"q": "If 2, 3 and 4 are the sides of triangle then \\(S\\) is", "o": ["4.5", "3.5", "2.5", "7.5"], "a": 0, "id": 161, "paper": "NED 2023"}, {"q": "A square matrix \\(A\\) such that \\(A^2=I\\) is called", "o": ["Nilpotent", "Involutory", "Idempotent", "None"], "a": 1, "id": 162, "paper": "NED 2023"}, {"q": "Product of roots of \\(3x^2+x+2=0\\)", "o": ["−2", "2", "\\(\\tfrac23\\)", "\\(\\tfrac{-2}{3}\\)"], "a": 2, "id": 163, "paper": "NED 2023"}, {"q": "The value of \\(k\\) when \\((k,-2)\\) and \\((3,-7)\\) lies on a line with slope \\(-4\\)", "o": ["\\(\\tfrac74\\)", "\\(\\tfrac{-7}{4}\\)", "\\(\\tfrac47\\)", "\\(\\tfrac{-4}{7}\\)"], "a": 0, "id": 164, "paper": "NED 2023"}, {"q": "\\(\\begin{bmatrix}4&2x\\\\-4x&-3\\end{bmatrix}+\\begin{bmatrix}-5&-3y\\\\5y&3\\end{bmatrix}=\\begin{bmatrix}-1&1\\\\1&0\\end{bmatrix}\\); find \\(x\\) & \\(y\\)", "o": ["\\((4,3)\\)", "\\((-4,-3)\\)", "\\((-3,-4)\\)", "\\((3,4)\\)"], "a": 1, "id": 165, "paper": "NED 2023"}, {"q": "\\((2-3i)^2-6(3-2i)+13=\\) ?", "o": ["\\(6i\\)", "\\(-6i\\)", "1", "−10"], "a": 3, "id": 166, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}x^4=\\) ?", "o": ["\\(nx\\)", "\\(nx^{n-1}\\)", "\\(nx^{n+1}\\)", "None"], "a": 1, "id": 167, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int C\\,dx=\\) ?", "o": ["\\(Cx+d\\)", "\\(Cx^2+d\\)", "\\(cx^3+d\\)", "None"], "a": 0, "id": 168, "paper": "NED 2023"}, {"q": "\\(\\sin(\\alpha+\\beta)=\\) ?", "o": ["\\(\\sin\\alpha\\cos\\beta-\\cos\\alpha\\sin\\beta\\)", "\\(\\sin\\alpha\\cos\\beta+\\cos\\alpha\\sin\\beta\\)", "\\(\\cos\\alpha\\cos\\beta-\\sin\\alpha\\sin\\beta\\)", "\\(\\cos\\alpha\\cos\\beta+\\sin\\alpha\\sin\\beta\\)"], "a": 1, "id": 169, "paper": "NED 2023"}, {"q": "Inverse of \\(\\begin{bmatrix}3&5\\\\2&4\\end{bmatrix}\\)", "o": ["\\(\\begin{bmatrix}2&5/2\\\\-1&3/2\\end{bmatrix}\\)", "\\(\\begin{bmatrix}2&-5/2\\\\-1&3/2\\end{bmatrix}\\)", "\\(\\begin{bmatrix}2&5/2\\\\1&3/2\\end{bmatrix}\\)", "None"], "a": 1, "id": 170, "paper": "NED 2023"}, {"q": "\\(\\begin{vmatrix}1&2&4\\\\8&16&32\\\\64&128&256\\end{vmatrix}=\\) ?", "o": ["1", "−1", "0", "2"], "a": 2, "id": 171, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\tan^{-1}(-x)=\\) ?", "o": ["\\(\\tfrac{-1}{1+x^2}\\)", "\\(\\tfrac{1}{1+x^2}\\)", "\\(\\tfrac{1}{1-x^2}\\)", "None"], "a": 0, "id": 172, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}\\dfrac{e^x-1}{x}=\\) ?", "o": ["1", "0", "−1", "None"], "a": 0, "id": 173, "paper": "NED 2023"}, {"q": "If \\(2a\\) and \\(a\\) are the roots of quadratic equation then equation is", "o": ["\\(x^2+3ax+2a^2=0\\)", "\\(x^2-3ax+2a^2=0\\)", "\\(x^2-3ax-2a^2=0\\)", "\\(x^2+3ax-2a^2=0\\)"], "a": 1, "id": 174, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{f'(x)}{f(x)}\\,dx\\)", "o": ["\\(\\ln f(x)+c\\)", "\\(\\ln f'(x)+c\\)", "\\(f(x)+c\\)", "None"], "a": 0, "id": 175, "paper": "NED 2023"}, {"q": "\\(\\vec a=2i+3j-k\\), \\(|\\vec a|=\\) ?", "o": ["\\(\\sqrt{14}\\)", "\\(\\sqrt{15}\\)", "\\(\\sqrt{17}\\)", "\\(\\sqrt{21}\\)"], "a": 0, "id": 176, "paper": "NED 2023"}, {"q": "\\(y=x\\) then angle of line w.r.t \\(x\\)-axis in anticlockwise direction", "o": ["\\(145^\\circ\\)", "\\(135^\\circ\\)", "\\(45^\\circ\\)", "None"], "a": 2, "id": 177, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\sec2x\\tan2x\\,dx\\)", "o": ["\\(\\tfrac{\\sec2x}{2}+c\\)", "\\(\\tfrac{\\tan2x}{2}+c\\)", "\\(\\tfrac{\\sin2x}{2}+c\\)", "\\(\\sin x+c\\)"], "a": 0, "id": 178, "paper": "NED 2023"}, {"q": "\\(\\cos2x-\\sin2x=\\) ?", "o": ["\\(\\cos^2x-\\sin^2x-2\\sin x\\cos x\\)", "\\(\\cos^2x+\\sin^2x\\)", "\\(\\cos^2x-\\sin^2x\\)", "None"], "a": 0, "id": 179, "paper": "NED 2023"}, {"q": "\\(\\dfrac{(x+1)^2}{9}+\\dfrac{(y-1)^2}{1}=1\\) then equation of directrix is", "o": ["\\(x+1=3\\)", "\\(x+1=\\pm\\tfrac{9}{2\\sqrt2}\\)", "\\(x+1=\\pm\\tfrac92\\)", "none"], "a": 1, "id": 180, "paper": "NED 2023"}, {"q": "Find the number whose sum is 5 and product is 6", "o": ["3, 2", "4, 5", "6, 8", "9, 4"], "a": 0, "id": 181, "paper": "NED 2023"}, {"q": "\\(15^\\circ=\\) ?", "o": ["\\(\\tfrac{\\pi}{12}\\) radian", "\\(\\tfrac{\\pi}{6}\\) radian", "\\(\\tfrac{\\pi}{2}\\) radian", "\\(\\tfrac{\\pi}{3}\\) radian"], "a": 0, "id": 182, "paper": "NED 2023"}, {"q": "If the ratio of angles is \\(1:1:2\\) then the triangle is", "o": ["Equilateral", "Isosceles", "Scalene", "Right Angle"], "a": 3, "u": "Triangle is both isosceles and right-angled (45-45-90); 'Right Angle' is the most distinctive.", "id": 183, "paper": "NED 2023"}, {"q": "\\(\\left(1+\\dfrac52 x\\right)^{1/2}\\) — the value of \\(x\\) for which expansion is valid", "o": ["\\(x>\\tfrac25\\)", "\\(|x|<\\tfrac25\\)", "\\(x<\\tfrac52\\)", "\\(|x|>\\tfrac52\\)"], "a": 1, "id": 184, "paper": "NED 2023"}, {"q": "\\(\\dfrac{x^2}{81}+\\dfrac{y^2}{|2|}=1\\) then the length of latus rectum is (taking \\(\\tfrac{x^2}{81}+\\tfrac{y^2}{121}\\))", "o": ["\\(\\tfrac{11}{162}\\)", "\\(\\tfrac{162}{11}\\)", "161", "None"], "a": 1, "id": 185, "paper": "NED 2023"}, {"q": "Range of \\(\\operatorname{cosec}x\\) is", "o": ["\\([-1,1]\\)", "\\(\\mathbb{R}-(-1,1)\\)", "\\(\\mathbb{R}-(1,1)\\)", "\\((1,1)\\)"], "a": 1, "id": 186, "paper": "NED 2023"}, {"q": "Three coins are tossed simultaneously; probability of at least one head?", "o": ["\\(\\tfrac38\\)", "\\(\\tfrac12\\)", "\\(\\tfrac78\\)", "\\(\\tfrac18\\)"], "a": 2, "id": 187, "paper": "NED 2023"}, {"q": "If \\(A=\\{1,2,3\\}\\), \\(B=\\{0,1,2,3\\}\\) then which one is true", "o": ["\\(A\\ne B\\)", "\\(B=A\\)", "\\(A\\subset B\\)", "None"], "a": 2, "id": 188, "paper": "NED 2023"}, {"q": "\\((3+x)^7\\) then coefficient of \\(x^3\\) is", "o": ["2815", "2835", "1825", "2845"], "a": 1, "id": 189, "paper": "NED 2023"}, {"q": "For equation \\(3x^2+kx+12=0\\) find \\(k\\) if sum of root is equal to product of root", "o": ["−12", "12", "3", "−3"], "a": 0, "id": 190, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int\\left(\\dfrac1x-e^x\\right)dx\\)", "o": ["\\(\\ln x(e^x-1)+c\\)", "\\(\\ln\\!\\left(\\tfrac{x}{e^{x-1}}\\right)+c\\)", "\\(\\ln(x\\cdot e^x-1)+c\\)", "None"], "a": 3, "u": "Correct answer \\(\\ln x-e^x+c\\); not among A–C, so None.", "id": 191, "paper": "NED 2023"}, {"q": "If \\(\\vec A=i-2j-k,\\ \\vec B=4i-4j+7ak\\) and the vectors are orthogonal then \\(a=\\) ?", "o": ["\\(\\tfrac{12}{9}\\)", "\\(\\tfrac{12}{7}\\)", "\\(\\tfrac{12}{5}\\)", "\\(\\tfrac{12}{11}\\)"], "a": 1, "id": 192, "paper": "NED 2023"}, {"q": "In the expansion of \\(\\left(x-\\dfrac2x\\right)^{12}\\), the value of \\(r\\) for the term independent of \\(x\\)", "o": ["5", "6", "7", "8"], "a": 1, "id": 193, "paper": "NED 2023"}, {"q": "Third term of G.P is \\(\\tfrac94\\) and its sixth term is \\(\\tfrac{243}{32}\\) then first term and common ratio is", "o": ["1, 2", "1, 3", "\\(1,\\tfrac23\\)", "None"], "a": 3, "u": "Correct \\((1,\\tfrac32)\\) is not listed, so None.", "id": 194, "paper": "NED 2023"}, {"q": "If \\(M\\) is the midpoint and \\(\\overline{AB}\\) is a line segment so \\(M(1,0)\\) and \\(B(2,3)\\), find \\(A\\)", "o": ["\\((0,-3)\\)", "\\((1,3)\\)", "\\((2,4)\\)", "\\((1,5)\\)"], "a": 0, "id": 195, "paper": "NED 2023"}, {"q": "\\(\\dfrac{\\sin\\theta+7\\cos\\theta}{\\sin^3\\theta+\\cos^3\\theta+\\cos\\theta}=\\) ? if \\(\\tan\\theta=\\tfrac34\\)", "o": ["\\(\\tfrac{31}{95}\\)", "\\(\\tfrac{93}{112}\\)", "\\(\\tfrac{95}{112}\\)", "\\(\\tfrac{112}{95}\\)"], "a": 0, "u": "Direct computation gives \\(\\tfrac{775}{191}\\approx4.06\\); none of the options match — source likely garbled.", "id": 196, "paper": "NED 2023"}, {"q": "The amount of water in Tank \\(t\\) minutes after it has started to drain is \\(w=100(t-15)^2\\) gallon. The water is running out after 5 min at a rate of", "o": ["2500 gal/min", "1500 gal/min", "1000 gal/min", "−2000 gal/min"], "a": 3, "id": 197, "paper": "NED 2023"}, {"q": "If \\(f(x)=x^3-9x^2+15x+3\\) then the relative maxima is", "o": ["15", "20", "30", "10"], "a": 3, "id": 198, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{f'(x)\\,dx}{f(x)}=\\) ?", "o": ["\\(f(x)+c\\)", "\\(f'(x)+c\\)", "\\(\\ln f(x)+c\\)", "None"], "a": 2, "id": 199, "paper": "NED 2023"}, {"q": "\\(f(z)=\\sqrt{z^2+8z}\\); how much does \\(f(z)\\) increase as \\(z\\) goes from 7 to 8", "o": ["0.646", "1.007", "2.963", "3.245"], "a": 1, "u": "Exact increase \\(\\approx1.067\\); closest listed is 1.007.", "id": 200, "paper": "NED 2023"}, {"q": "\\(3x-2y=5\\) and \\(2x+3y=4\\); find \\(\\theta\\) between lines", "o": ["\\(90^\\circ\\)", "\\(0^\\circ\\)", "\\(45^\\circ\\)", "\\(60^\\circ\\)"], "a": 0, "id": 201, "paper": "NED 2023"}, {"q": "\\(\\dfrac{x^3-3x^2+5x-6}{x-2}=\\) ?", "o": ["\\(x^2-x+3\\)", "\\(x-3\\)", "\\(x+3\\)", "13"], "a": 0, "id": 202, "paper": "NED 2023"}, {"q": "Find equation of ellipse if the end of minor axis is \\((\\pm3,0)\\) and the equation of directrix is \\(7y=\\pm16\\sqrt7\\)", "o": ["\\(4x^2+3y^2=32\\)", "\\(4x^2+3y^2=16\\)", "\\(4x^2+7y^2=8\\)", "None"], "a": 3, "u": "Derivation gives \\(16x^2+7y^2=144\\); not listed, so None.", "id": 203, "paper": "NED 2023"}, {"q": "Find the equation of rectangular hyperbola if foci are \\((\\pm2,0)\\)", "o": ["\\(x^2-y^2=4\\)", "\\(x^2-y^2=2\\)", "\\(x^2-y^2=1\\)", "None"], "a": 1, "id": 204, "paper": "NED 2023"}, {"q": "\\(\\tfrac13,\\ 1\\tfrac23,\\ 3,\\dots\\) then \\(T_n\\) of the sequence is", "o": ["\\(\\tfrac13(4n-3)\\)", "\\(\\tfrac13(4n+3)\\)", "\\(\\tfrac12(4n-3)\\)", "\\(\\tfrac15(4n-3)\\)"], "a": 0, "id": 205, "paper": "NED 2023"}, {"q": "For any square matrix \\(A=-A^t\\) then matrix is", "o": ["Symmetric", "Skew symmetric", "Idempotent", "Involuntary"], "a": 1, "id": 206, "paper": "NED 2023"}, {"q": "\\(4x^2+25y^2=100\\) then equation of directrix is", "o": ["\\(21x=\\pm25\\)", "\\(\\sqrt{21}\\,x=\\pm25\\)", "\\(21x=\\pm\\sqrt{23}\\)", "\\(\\sqrt{21}\\,x=\\pm5\\)"], "a": 1, "id": 207, "paper": "NED 2023"}, {"q": "\\((x+2)^3-3(x+2)^2+3(x+2)-1=\\) ?", "o": ["\\((x+1)^3\\)", "\\((x-1)^3\\)", "\\((x-2)^3\\)", "None"], "a": 0, "id": 208, "paper": "NED 2023"}, {"q": "For equation \\(9x^2+16y^2=144\\) the co-ordinate of focus is", "o": ["\\((\\pm4,0)\\)", "\\((0,\\pm4)\\)", "\\((\\pm\\sqrt7,0)\\)", "\\((0,\\pm\\sqrt7)\\)"], "a": 2, "id": 209, "paper": "NED 2023"}, {"q": "Partial fraction \\(\\dfrac{x+34}{(x-6)(x-2)}\\)", "o": ["\\(\\tfrac{A}{x-2}\\)", "\\(\\tfrac{A}{x+2}\\)", "\\(\\tfrac{A}{x+6}+\\tfrac{B}{x-2}\\)", "None"], "a": 3, "u": "Correct form \\(\\tfrac{A}{x-6}+\\tfrac{B}{x-2}\\); not among A–C, so None.", "id": 210, "paper": "NED 2023"}, {"q": "Modulus of \\((x,y)\\) is", "o": ["\\(\\sqrt{x^2-y^2}\\)", "\\(\\sqrt{x^2+y^2}\\)", "\\(\\sqrt{x^2-\\tfrac{y^2}{2}}\\)", "\\(x^2+y^2\\)"], "a": 1, "id": 211, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\,UV=\\) ?", "o": ["\\(UV'-VU'\\)", "\\(UV'+VU'\\)", "\\(UV'-UV'\\)", "\\(VU'\\)"], "a": 1, "id": 212, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}\\left(\\dfrac1x-\\dfrac{1}{e^{x-1}}\\right)\\)", "o": ["2", "−3", "−4", "None"], "a": 3, "u": "Intended \\(\\lim_{x\\to0}\\big(\\tfrac1x-\\tfrac{1}{e^{x}-1}\\big)=\\tfrac12\\); not listed, so None.", "id": 213, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_0^3 \\dfrac{dx}{\\sqrt{1-x^2}}=\\) ?", "o": ["\\(\\sin^{-1}\\!\\left(\\tfrac13\\right)\\)", "\\(\\sin^{-1}\\!\\left(\\tfrac14\\right)\\)", "\\(\\sin^{-1}\\!\\left(\\tfrac15\\right)\\)", "None"], "a": 3, "u": "Integrand undefined for x>1, so the integral does not exist — None.", "id": 214, "paper": "NED 2023"}, {"q": "The coefficient of 5th term involving \\(x^5\\) in the expansion \\(\\left(1-\\dfrac{x}{2}\\right)^{12}\\) is", "o": ["\\(\\tfrac{-99}{4}x^5\\)", "\\(\\tfrac{99}{4}x^5\\)", "\\(99x^5\\)", "\\(\\tfrac{1}{32}x^5\\)"], "a": 0, "id": 215, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}\\dfrac{a^x-1}{x}=\\) ?", "o": ["\\(\\ln x\\)", "\\(\\ln a\\)", "0", "1"], "a": 1, "id": 216, "paper": "NED 2023"}, {"q": "If two A.M's are inserted b/w \\(3a\\) & \\(3b\\) then sum of series will be", "o": ["\\(4a+4b\\)", "\\(6a+6b\\)", "\\(3a+3b\\)", "None"], "a": 1, "id": 217, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\left(2-\\sqrt{x}\\right)=\\) ?", "o": ["\\(\\tfrac{1}{2\\sqrt{x}}\\)", "\\(\\tfrac{-1}{2\\sqrt{x}}\\)", "\\(\\tfrac{-1}{2}\\)", "\\(\\tfrac12\\)"], "a": 1, "id": 218, "paper": "NED 2023"}, {"q": "Range of \\(\\cos x\\) is", "o": ["\\([-1,1]\\)", "\\((-1,1)\\)", "\\((-1,1]\\)", "\\(]-1,1[\\)"], "a": 0, "id": 219, "paper": "NED 2023"}, {"q": "Solution of the equation \\(\\dfrac{x-2}{x+2}+\\dfrac{x+2}{x-2}=\\dfrac{34}{15}\\)", "o": ["8", "−8", "4", "A & B"], "a": 3, "id": 220, "paper": "NED 2023"}, {"q": "In \\(\\triangle ABC\\), \\(\\sin A=\\tfrac13\\), \\(\\sin B=\\tfrac14\\), \\(\\sin C=\\) ?", "o": ["\\(\\tfrac17\\)", "\\(\\tfrac{7}{12}\\)", "\\(\\tfrac{2\\sqrt2+\\sqrt{15}}{12}\\)", "\\(\\tfrac{5}{12}\\)"], "a": 2, "id": 221, "paper": "NED 2023"}, {"q": "If \\(\\sin x=\\tfrac34\\) and \\(\\cos x>0\\) then \\(\\cos x=\\) ?", "o": ["\\(\\tfrac{\\sqrt7}{4}\\)", "\\(-\\tfrac{\\sqrt7}{4}\\)", "\\(\\pm\\tfrac{\\sqrt7}{4}\\)", "None"], "a": 0, "id": 222, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\sec3x\\tan3x\\,dx\\)", "o": ["\\(\\tfrac{\\sec3x}{3}+C\\)", "\\(\\sec3x+C\\)", "\\(\\tan3x+C\\)", "\\(-\\tan3x+C\\)"], "a": 0, "id": 223, "paper": "NED 2023"}, {"q": "\\(\\cos10^\\circ\\cos20^\\circ-\\sin10^\\circ\\sin20^\\circ=\\) ?", "o": ["\\(-\\tfrac{\\sqrt3}{2}\\)", "\\(\\tfrac{\\sqrt3}{2}\\)", "\\(\\tfrac12\\)", "\\(-\\tfrac12\\)"], "a": 1, "id": 224, "paper": "NED 2023"}, {"q": "\\((a^2)^3+b^2\\cdot b^3=\\) ?", "o": ["\\(a^2+b^5\\)", "\\(a^2+b^3\\)", "\\(a^6+b^5\\)", "\\(a^6\\)"], "a": 2, "id": 225, "paper": "NED 2023"}, {"q": "If the circle passes all three vertices of the triangle then it is called", "o": ["Incircle", "ex-circle", "Circum circle", "Centroid"], "a": 2, "id": 226, "paper": "NED 2023"}, {"q": "The value of \\(0!\\) and \\(1!\\) are", "o": ["0 and 1", "1 and 1", "1 and 0", "0"], "a": 1, "id": 227, "paper": "NED 2023"}, {"q": "\\(16^x=4\\) & \\(5^{x+y}=625\\) then \\(y\\)?", "o": ["\\(\\tfrac32\\)", "\\(\\tfrac52\\)", "\\(\\tfrac72\\)", "\\(\\tfrac92\\)"], "a": 2, "id": 228, "paper": "NED 2023"}, {"q": "\\(\\sqrt{y}=e^x+2\\) then \\(\\dfrac{dy}{dx}\\) is", "o": ["\\(\\tfrac{e^x}{\\sqrt{y}}\\)", "\\(e^x\\sqrt2\\,y\\)", "\\(e^x\\,2\\sqrt{y}\\)", "\\(\\tfrac{\\sqrt{y}}{e^x}\\)"], "a": 2, "id": 229, "paper": "NED 2023"}, {"q": "If \\(A\\) and \\(B\\) are two sets then \\((A\\cup B)'\\)", "o": ["\\(A'\\cup B'\\)", "\\(A'\\cap B'\\)", "\\(A\\cup B\\)", "\\(A\\cap B\\)"], "a": 1, "id": 230, "paper": "NED 2023"}, {"q": "Third term of a G.P is \\(\\tfrac94\\) and sixth term is \\(\\tfrac{243}{32}\\) then first term and common ratio is", "o": ["\\(1,\\tfrac32\\)", "\\(2,\\tfrac49\\)", "\\(1,\\tfrac23\\)", "\\(1,\\tfrac{-3}{2}\\)"], "a": 0, "id": 231, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\sin^3x\\,dx\\)?", "o": ["\\(-\\cos x+\\tfrac{\\cos^3x}{3}+C\\)", "\\(-\\cos x+\\tfrac{\\cos^2x}{2}+C\\)", "\\(-\\cos x+C\\)", "\\(\\tfrac{-\\cos^3x}{3}+\\cos x+C\\)"], "a": 0, "id": 232, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to a}\\dfrac{x^n-a^n}{x-a}=\\) ?", "o": ["\\(nx^{n-1}\\)", "\\(na^{n-1}\\)", "\\(na\\)", "None"], "a": 1, "id": 233, "paper": "NED 2023"}, {"q": "If \\(\\tan x=3\\) then \\(\\dfrac{\\sin^2x}{\\cos^2x}=\\) ?", "o": ["3", "1", "9", "\\(\\pm9\\)"], "a": 2, "id": 234, "paper": "NED 2023"}, {"q": "Two coins are tossed together once; probability of obtaining at most two heads is", "o": ["1", "\\(\\tfrac12\\)", "\\(\\tfrac14\\)", "0"], "a": 0, "id": 235, "paper": "NED 2023"}, {"q": "If \\(f(x)=x^7-97x^6-199x^5+99x^4-2x+190\\) then \\(f(99)=\\) ?", "o": ["0", "1", "2", "−8"], "a": 3, "id": 236, "paper": "NED 2023"}, {"q": "The area of triangle with vertices \\((3,1),(-2,5),(-4,-5)\\)", "o": ["29 sq unit", "31 sq unit", "25 sq unit", "33 sq unit"], "a": 0, "id": 237, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int (e^x+x)\\,dx\\)", "o": ["\\(e^x+x+C\\)", "\\(e^x+\\tfrac{x^2}{2}+C\\)", "\\(e^x+x^3+C\\)", "\\(e^x+C\\)"], "a": 1, "id": 238, "paper": "NED 2023"}, {"q": "A square matrix such that \\(A^2=I\\) is called", "o": ["Nilpotent", "Involutory", "Symmetric", "None"], "a": 1, "id": 239, "paper": "NED 2023"}, {"q": "\\(y^2=-12x\\) then focus is", "o": ["\\((0,3)\\)", "\\((0,-3)\\)", "\\((-3,0)\\)", "\\((3,0)\\)"], "a": 2, "id": 240, "paper": "NED 2023"}, {"q": "\\(7y^2-4x^2=28\\) then distance between its directrices is", "o": ["\\(\\tfrac{8\\sqrt{11}}{11}\\)", "8", "\\(\\sqrt{11}\\)", "\\(\\tfrac{8\\sqrt{13}}{11}\\)"], "a": 0, "id": 241, "paper": "NED 2023"}, {"q": "\\(f(x)=x^x\\) then \\(f'(x)\\) is", "o": ["\\((1+\\ln x)x^x\\)", "\\((1-\\ln x)x^x\\)", "\\(\\tfrac{(1+\\ln x)}{x^x}\\)", "None"], "a": 0, "id": 242, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}x^x=\\) ?", "o": ["1", "0", "−1", "2"], "a": 0, "id": 243, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\cos^{-1}2x=\\) ?", "o": ["\\(\\tfrac{x^3}{\\sqrt{1-4x^2}}\\)", "\\(\\tfrac{-2}{\\sqrt{1-4x^2}}\\)", "\\(\\tfrac{1}{1+4x^2}\\)", "\\(\\tfrac{-1}{1+4x^2}\\)"], "a": 1, "id": 244, "paper": "NED 2023"}, {"q": "\\(x^2-6x-6y+21=0\\); equation of directrix of parabola is", "o": ["\\(2x=1\\)", "\\(2y=1\\)", "\\(2y=-1\\)", "\\(2x=-1\\)"], "a": 1, "id": 245, "paper": "NED 2023"}, {"q": "\\(\\dfrac{\\cos x}{\\tan x\\sin x}=\\) ?", "o": ["\\(\\cot^2x\\)", "\\(\\tfrac{1}{\\cot^2x}\\)", "\\(\\cos^2x\\)", "\\(\\sin^2x\\)"], "a": 0, "id": 246, "paper": "NED 2023"}, {"q": "In an H.P \\(T_{10}=34\\) and \\(T_{34}=25\\) and \\(T_n=3\\) then number of terms is", "o": ["2000", "10", "8", "None"], "a": 3, "u": "Source 'wrong data'; intended answer \\(n=700\\), not listed, so None.", "id": 247, "paper": "NED 2023"}, {"q": "\\(5x^2+9y^2=45\\); the equation of directrix of ellipse is", "o": ["\\(2x=\\pm9\\)", "\\(4x=\\pm13\\)", "\\(x=\\pm9\\)", "None"], "a": 0, "id": 248, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}x^{\\cos x}=\\) ?", "o": ["\\(\\left[\\tfrac{\\cos x}{x}-\\ln x\\sin x\\right]x^{\\cos x}\\)", "\\(\\left[\\tfrac{\\cos x}{x}+\\ln x\\sin x\\right]x^{\\cos x}\\)", "\\(\\left[\\tfrac{\\cos x}{x}-\\ln x\\sin x\\right]\\)", "None"], "a": 0, "id": 249, "paper": "NED 2023"}, {"q": "\\(1\\cdot\\omega\\cdot\\omega^2=\\) ? (\\(\\omega\\) cube root of unity)", "o": ["1", "\\(\\omega^2\\)", "\\(\\omega\\)", "0"], "a": 0, "id": 250, "paper": "NED 2023"}, {"q": "Two dice are rolled once; probability of same faces is", "o": ["\\(\\tfrac15\\)", "\\(\\tfrac14\\)", "\\(\\tfrac29\\)", "\\(\\tfrac16\\)"], "a": 3, "id": 251, "paper": "NED 2023"}, {"q": "For any square matrix \\(A^{k+1}=A\\) then it is called", "o": ["Symmetric matrix", "Periodic matrix", "Rectangular matrix", "None"], "a": 1, "id": 252, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\left(\\dfrac{e^x+1}{e^x-1}\\right)\\)", "o": ["\\(\\tfrac{-2e^x}{(e^x-1)^2}\\)", "\\(\\tfrac{2e^x}{(e^x-1)^2}\\)", "\\(\\tfrac{e^x}{(e^x-1)^2}\\)", "None"], "a": 0, "id": 253, "paper": "NED 2023"}, {"q": "\\(\\dfrac{\\cos^4x-\\sin^4x}{\\cos^2x-\\sin^2x}=\\) ?", "o": ["1", "−1", "\\(\\cos^2x-\\sin^2x\\)", "None"], "a": 0, "id": 254, "paper": "NED 2023"}, {"q": "\\(\\omega^{32}=\\) ?", "o": ["\\(\\omega\\)", "\\(\\omega^2\\)", "1", "0"], "a": 1, "id": 255, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to\\infty}\\dfrac{\\ln x}{x}=\\) ?", "o": ["1", "0", "−1", "\\(\\infty\\)"], "a": 1, "id": 256, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int e^{\\tan x}\\sec^2x\\,dx=\\) ?", "o": ["\\(e^{\\tan x}+c\\)", "\\(e^{\\tan x}\\sec^2x+c\\)", "\\(-e^{\\tan x}+c\\)", "None"], "a": 0, "id": 257, "paper": "NED 2023"}, {"q": "\\(\\sqrt{\\dfrac{1-\\cos A}{1+\\cos A}}=\\dfrac{x}{y}\\); \\(\\tan A=\\) ?", "o": ["\\(\\tfrac{2xy}{x^2-y^2}\\)", "\\(\\tfrac{2xy}{x^2+y^2}\\)", "\\(\\tfrac{2xy}{x^2+y^4}\\)", "\\(\\tfrac{2xy^2}{x^2-y^2}\\)"], "a": 0, "id": 258, "paper": "NED 2023"}, {"q": "\\(\\dfrac{1}{1+\\sin x}+\\dfrac{1}{1-\\sin x}=\\) ?", "o": ["\\(2\\cos^2x\\)", "\\(2\\sec^2x\\)", "\\(2\\tan^2x\\)", "\\(2\\operatorname{cosec}^2x\\)"], "a": 1, "id": 259, "paper": "NED 2023"}, {"q": "\\(\\left(x^3+\\dfrac{1}{x^2}\\right)^7\\) then middle of expansion is", "o": ["\\(35x\\)", "\\(35x^6\\)", "\\(35x^3\\)", "A & B", "B & C"], "a": 3, "id": 260, "paper": "NED 2023"}, {"q": "\\(\\dfrac{x^2}{16}-\\dfrac{y^2}{9}=1\\) then foci of hyperbola is", "o": ["\\((0,\\pm5)\\)", "\\((\\pm5,0)\\)", "\\((\\pm\\sqrt7,0)\\)", "\\((0,\\pm\\sqrt7)\\)"], "a": 1, "id": 261, "paper": "NED 2023"}, {"q": "If \\(ax^2+2hxy+by^2=0\\) represents an imaginary line then", "o": ["\\(h^2-ab=0\\)", "\\(h^2-ab>0\\)", "\\(h^2-ab<0\\)", "None"], "a": 2, "id": 262, "paper": "NED 2023"}, {"q": "From a bag containing 2 red, 4 yellow and 3 blue balls; probability of getting red ball", "o": ["\\(\\tfrac27\\)", "\\(\\tfrac29\\)", "\\(\\tfrac72\\)", "\\(\\tfrac25\\)"], "a": 1, "id": 263, "paper": "NED 2023"}, {"q": "If \\(-4\\) and \\(7\\) are roots then equation is", "o": ["\\(x^2-3x-28=0\\)", "\\(x^2+3x+28=0\\)", "\\(x^2+3x-28>0\\)", "\\(x^2-3x+28=0\\)"], "a": 0, "id": 264, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}\\dfrac{\\sin5x-\\sin3x}{x}=\\) ?", "o": ["2", "1", "−1", "0"], "a": 0, "id": 265, "paper": "NED 2023"}, {"q": "\\(x=2^a\\) then \\(2^{a+3}=\\) ?", "o": ["8", "\\(8x\\)", "\\(6x\\)", "\\(12x\\)"], "a": 1, "id": 266, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\sec3x\\cos3x\\,dx\\)", "o": ["\\(x+c\\)", "\\(\\sec3x+c\\)", "\\(\\tan3x+c\\)", "\\(\\cos^2 3x+c\\)"], "a": 0, "id": 267, "paper": "NED 2023"}, {"q": "From the deck of 52 playing cards probability of getting red king", "o": ["\\(\\tfrac{1}{52}\\)", "\\(\\tfrac{1}{26}\\)", "\\(\\tfrac{4}{13}\\)", "\\(\\tfrac{3}{13}\\)"], "a": 1, "id": 268, "paper": "NED 2023"}, {"q": "From a deck of 52 playing cards probability of getting non-ace", "o": ["\\(\\tfrac{48}{51}\\)", "\\(\\tfrac{48}{52}\\)", "\\(\\tfrac{47}{52}\\)", "None"], "a": 1, "id": 269, "paper": "NED 2023"}, {"q": "Let \\(A=\\begin{bmatrix}-2&-2&0\\\\-3&1&2\\\\1&-3&-1\\end{bmatrix}\\); if \\(|A|=12\\) and \\(B\\) is the transpose of \\(A\\) then \\(|B|\\) is", "o": ["12", "\\(\\tfrac{1}{12}\\)", "−12", "0"], "a": 0, "id": 270, "paper": "NED 2023"}, {"q": "\\(\\dfrac{(n+1)!}{(n-1)!}=\\) ?", "o": ["\\(n(n+1)(n-1)\\)", "\\(n\\)", "\\(n(n+1)\\)", "\\(n+1\\)"], "a": 2, "id": 271, "paper": "NED 2023"}, {"q": "If 4 A.M's are inserted between \\((a-b)\\) and \\(9a+11b\\) then the value of fourth A.M is", "o": ["\\(\\tfrac{13a+7b}{5}\\)", "\\(\\tfrac{21a+19b}{5}\\)", "\\(\\tfrac{31a+29b}{5}\\)", "\\(\\tfrac{37a+43b}{5}\\)"], "a": 3, "id": 272, "paper": "NED 2023"}, {"q": "In the expansion of \\((3+x)^7\\) coefficient of \\(x^3\\) is", "o": ["2815", "2835", "2385", "2895"], "a": 1, "id": 273, "paper": "NED 2023"}, {"q": "Which law can be reduced into Pythagoras theorem?", "o": ["Law of sine", "Law of tangent", "Law of cosine", "None"], "a": 2, "id": 274, "paper": "NED 2023"}, {"q": "The first three terms of G.P are \\(x+10,\\ x-2,\\ x-10\\); value of \\(x\\) and sum to infinity is", "o": ["26, 106", "26, 108", "24, 108", "30, 108"], "a": 1, "id": 275, "paper": "NED 2023"}, {"q": "Product of root of \\(3x^2+4x+2=0\\) is", "o": ["\\(\\tfrac43\\)", "\\(\\tfrac34\\)", "\\(\\tfrac23\\)", "\\(\\tfrac{-2}{3}\\)"], "a": 2, "id": 276, "paper": "NED 2023"}, {"q": "\\((x+2)^3-3(x+2)^2+3(x+2)-1=\\) ?", "o": ["\\((x+1)^3\\)", "\\((x-1)^3\\)", "\\((x+2)^3\\)", "\\((x-2)^3\\)"], "a": 0, "id": 277, "paper": "NED 2023"}, {"q": "\\(\\vec A=2i+2j-k\\) and \\(\\vec B=6i-3j+2k\\) then angle between vectors is", "o": ["\\(\\cos^{-1}\\!\\left(\\tfrac{4}{21}\\right)\\)", "\\(\\cos^{-1}\\!\\left(\\tfrac{8}{21}\\right)\\)", "\\(\\cos^{-1}\\!\\left(\\tfrac{5}{21}\\right)\\)", "\\(\\cos^{-1}\\!\\left(\\tfrac{7}{21}\\right)\\)"], "a": 0, "id": 278, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to\\pi/2}\\dfrac{\\cos x}{x^2}=\\) ?", "o": ["0", "1", "−1", "\\(\\infty\\)"], "a": 0, "id": 279, "paper": "NED 2023"}, {"q": "\\(1+\\omega+\\omega^2=\\) ?", "o": ["1", "−1", "0", "2"], "a": 2, "id": 280, "paper": "NED 2023"}, {"q": "\\(\\cos\\dfrac{\\alpha}{2}=\\) ?", "o": ["\\(\\sqrt{\\tfrac{(s-a)}{bc}}\\)", "\\(\\sqrt{\\tfrac{s(s-b)}{ac}}\\)", "\\(\\sqrt{\\tfrac{s(s-c)}{ab}}\\)", "None"], "a": 3, "u": "Correct \\(\\cos\\tfrac{\\alpha}{2}=\\sqrt{\\tfrac{s(s-a)}{bc}}\\); not matched by A–C, so None.", "id": 281, "paper": "NED 2023"}, {"q": "\\(i^3=\\) ?", "o": ["\\(i\\)", "\\(-i\\)", "1", "−1"], "a": 1, "id": 282, "paper": "NED 2023"}, {"q": "\\(ax^2-lx+mn=0\\) then sum of root is", "o": ["\\(\\tfrac{l}{mn}\\)", "\\(\\tfrac{l}{a}\\)", "\\(\\tfrac{mn}{a}\\)", "\\(\\tfrac{-mn}{a}\\)"], "a": 1, "id": 283, "paper": "NED 2023"}, {"q": "\\(\\sin\\theta+\\sin(-\\theta)+\\cos\\theta+\\cos(-\\theta)+\\tan\\theta+\\tan(-\\theta)=\\) ?", "o": ["\\(\\sin\\theta\\)", "0", "\\(2\\cos\\theta\\)", "None"], "a": 2, "id": 284, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_1^3 f(x)\\,dx=5\\) then \\(\\displaystyle\\int_1^3 3f(x)\\,dx=\\) ?", "o": ["11", "8", "15", "20"], "a": 2, "id": 285, "paper": "NED 2023"}, {"q": "\\(\\dfrac{1+\\cos4x}{2}=\\) ?", "o": ["\\(\\cos^2 2x\\)", "\\(\\sin^2 2x\\)", "\\(\\cos^2 6x\\)", "\\(\\cos^2 8x\\)"], "a": 0, "id": 286, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{2x\\,dx}{x^2+1}=\\) ?", "o": ["\\(-\\ln(x^2+1)+c\\)", "\\(\\ln(x^2+1)+c\\)", "\\(\\ln(x)+c\\)", "\\(\\ln(2x)+c\\)"], "a": 1, "id": 287, "paper": "NED 2023"}, {"q": "The 2nd and 5th term of G.P are 6 and 48; find the sum of 10 terms", "o": ["3018", "3085", "3010", "None"], "a": 3, "u": "With \\(a=3,r=2\\), \\(S_{10}=3069\\); not listed, so None.", "id": 288, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int\\left(\\sqrt{x}+\\dfrac{1}{\\sqrt{x}}\\right)^2 dx\\)", "o": ["\\(\\tfrac{x^2}{2}+2x+c\\)", "\\(\\tfrac{x^2}{2}+2x+\\ln(x)+c\\)", "\\(\\tfrac{x^2}{2}-2x+\\ln(x)+c\\)", "None"], "a": 1, "id": 289, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\ln x\\,dx=\\) ?", "o": ["\\(x\\ln x-x+c\\)", "\\(x\\ln x+x+c\\)", "\\(x\\ln x+c\\)", "None"], "a": 0, "id": 290, "paper": "NED 2023"}, {"q": "If \\(e=\\tfrac32\\) then conic is", "o": ["Parabola", "Ellipse", "Hyperbola", "Circle"], "a": 2, "id": 291, "paper": "NED 2023"}, {"q": "\\(A=\\begin{vmatrix}1&0&0\\\\0&\\omega&0\\\\0&0&\\omega^2\\end{vmatrix}\\); the \\(|A|\\) is", "o": ["\\(\\omega\\)", "1", "\\(\\omega^2\\)", "0"], "a": 1, "id": 292, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int x\\cot^2 x\\,dx\\) (\\(\\int x\\cot x^2\\,dx\\))", "o": ["\\(\\tfrac12\\ln\\sin x^2+c\\)", "\\(\\tfrac{-1}{2}\\ln\\sin x^2+c\\)", "\\(\\ln\\sin x^2+c\\)", "None"], "a": 0, "id": 293, "paper": "NED 2023"}, {"q": "\\(\\dfrac{d}{dx}\\ln(x^2+x)=\\) ?", "o": ["\\(\\tfrac{-2x+1}{x^2+x}\\)", "\\(\\tfrac{2x+1}{x^2+x}\\)", "\\(\\tfrac{2x+1}{x^2-x}\\)", "\\(\\tfrac{2x}{x^2+x}\\)"], "a": 1, "id": 294, "paper": "NED 2023"}, {"q": "\\(2-\\cos2x-\\sin2x\\), value when \\(x=45^\\circ\\)", "o": ["−1", "0", "1", "−2"], "a": 2, "id": 295, "paper": "NED 2023"}, {"q": "The term independent of \\(x\\) in the expansion \\(\\left(x^2-\\dfrac{2}{x^2}\\right)^{12}\\) is", "o": ["8064", "−8064", "59136", "−59136"], "a": 2, "id": 296, "paper": "NED 2023"}, {"q": "\\(f(x)=\\sin x\\) then \\(f''(x)\\) is", "o": ["\\(\\sin x\\)", "\\(\\cos x\\)", "\\(-\\sin x\\)", "\\(-\\cos x\\)"], "a": 2, "id": 297, "paper": "NED 2023"}, {"q": "The \\(T_n\\) of the sequence \\(\\tfrac13,\\ 1\\tfrac23,\\ 3,\\dots\\)", "o": ["\\(4n-3\\)", "\\(\\tfrac13(4n-3)\\)", "\\(4n+3\\)", "None"], "a": 1, "id": 298, "paper": "NED 2023"}, {"q": "Centre of circle \\(x^2+y^2-6x+8y-12=0\\)", "o": ["\\((3,4)\\)", "\\((3,-4)\\)", "\\((-3,-4)\\)", "\\((4,3)\\)"], "a": 1, "id": 299, "paper": "NED 2023"}, {"q": "Slope of tangent \\(y=6x^2\\) at the point \\((1,-1)\\) is", "o": ["−1", "12", "−12", "1"], "a": 1, "id": 300, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{dx}{\\sqrt{9-x^2}}=\\) ?", "o": ["\\(\\sin^{-1}\\!\\left(\\tfrac{x}{3}\\right)+c\\)", "\\(\\sin^{-1}\\!\\left(\\tfrac{x}{2}\\right)+c\\)", "\\(\\sin^{-1}(x)+c\\)", "None"], "a": 0, "id": 301, "paper": "NED 2023"}, {"q": "\\((\\cos\\theta+i\\sin\\theta)^n=\\) ?", "o": ["\\(\\cos n\\theta+i\\sin\\theta\\)", "\\(\\cos n\\theta+i\\sin n\\theta\\)", "\\(\\cos\\theta+i\\sin n\\theta\\)", "None"], "a": 1, "id": 302, "paper": "NED 2023"}, {"q": "For any square matrix \\(A=-A^t\\) then \\(A\\) is", "o": ["Symmetric", "Skew symmetric", "Square", "Singular"], "a": 1, "id": 303, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\lim_{x\\to0}x\\ln x=\\) ?", "o": ["1", "0", "−1", "Does not exist"], "a": 1, "id": 304, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{f'(x)}{f(x)}\\,dx\\)", "o": ["\\(\\ln f'(x)+c\\)", "\\(\\ln f(x)+c\\)", "\\(\\ln(x)+c\\)", "None"], "a": 1, "id": 305, "paper": "NED 2023"}, {"q": "From a deck of 52 playing cards probability of obtaining Red king is", "o": ["\\(\\tfrac{1}{26}\\)", "\\(\\tfrac{1}{52}\\)", "\\(\\tfrac{13}{52}\\)", "\\(\\tfrac{4}{52}\\)"], "a": 0, "id": 306, "paper": "NED 2023"}, {"q": "If \\(A,G,H\\) are the arithmetic, geometric and harmonic mean between two numbers, which one is true?", "o": ["\\(G^2=AH\\)", "\\(A^2=GH\\)", "\\(H^2=AG\\)", "\\(G=\\tfrac{A}{H}\\)"], "a": 0, "id": 307, "paper": "NED 2023"}, {"q": "Range of \\(\\cos x\\) is", "o": ["\\((-1,1)\\)", "\\([-1,1]\\)", "\\((-\\infty,+\\infty)\\)", "\\((1,\\infty)\\)"], "a": 1, "id": 308, "paper": "NED 2023"}, {"q": "\\(i^{16}+i^{32}-i^{67}=\\) ?", "o": ["1", "−1", "\\(i+2\\)", "\\(-i\\)"], "a": 2, "id": 309, "paper": "NED 2023"}, {"q": "Solve \\(\\begin{vmatrix}1&a&b\\\\1&x&b\\\\1&c&x\\end{vmatrix}=0\\)", "o": ["\\((a,a^2)\\)", "\\((a^2,b^2)\\)", "\\((a,b)\\)", "\\((a^2,-b^2)\\)"], "a": 2, "id": 310, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int \\dfrac{dx}{ax+b}\\)", "o": ["\\(\\tfrac1a\\ln(ax+b)+c\\)", "\\(\\tfrac1b\\ln(ax+b)+c\\)", "\\(\\ln(ax+b)+c\\)", "None"], "a": 0, "id": 311, "paper": "NED 2023"}, {"q": "\\(\\displaystyle\\int_0^{\\pi/2}\\cos^4x\\,dx\\)", "o": ["\\(\\tfrac{\\pi}{6}\\)", "\\(\\tfrac{\\pi}{16}\\)", "\\(\\tfrac{3\\pi}{16}\\)", "\\(\\tfrac{\\pi}{4}\\)"], "a": 2, "id": 312, "paper": "NED 2023"}, {"q": "\\(\\cos3x=\\tfrac12\\) then solution is", "o": ["\\(\\cos^{-1}=\\tfrac12\\)", "\\(\\tfrac13\\operatorname{Arc}\\cos\\tfrac12\\)", "\\(-\\tfrac13\\operatorname{Arc}\\cos\\tfrac12\\)", "none"], "a": 1, "id": 313, "paper": "NED 2023"}];
+const KEY = ['A','B','C','D','E','F'];
+
+// ---- state ----
+let pool=[], cur=0, answers=[], timerId=null, startTs=0, elapsed=0, finished=false;
+
+// ---- watermark build ----
+(function(){
+  const wm=document.getElementById('wm'); let html='';
+  for(let r=-1;r<14;r++) for(let c=-1;c<8;c++){
+    html+=`<div style="top:${r*120-40}px;left:${c*360-120}px">Prepared By Altamash</div>`;
+  }
+  wm.innerHTML=html;
+})();
+
+// ---- papers (built from data; ready for multi-paper) ----
+const papers = [...new Set(ALL.map(q=>q.paper))];
+let selectedPaper='ALL';
+(function(){
+  const box=document.getElementById('papers');
+  const mk=(id,label)=>{const b=document.createElement('button');b.className='paperbtn'+(id==='ALL'?' active':'');b.textContent=label;b.dataset.id=id;
+    b.onclick=()=>{selectedPaper=id;[...box.children].forEach(x=>x.classList.toggle('active',x.dataset.id===id));updateCover();};box.appendChild(b);};
+  mk('ALL','All Questions');
+  papers.forEach(p=>mk(p,p));
+})();
+function poolFor(){ return selectedPaper==='ALL'?ALL:ALL.filter(q=>q.paper===selectedPaper); }
+function updateCover(){ document.getElementById('stTotal').textContent=poolFor().length; }
+updateCover();
+
+// ---- helpers ----
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function typeset(el){ if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([el]).catch(()=>{});} }
+function $(id){return document.getElementById(id);}
+
+// ---- start ----
+$('startBtn').onclick=()=>{
+  let qs=poolFor().map(q=>({...q}));
+  if($('optShuffle').checked) shuffle(qs);
+  if($('optShuffleOpts').checked){
+    qs=qs.map(q=>{
+      const idx=q.o.map((_,i)=>i); shuffle(idx);
+      return {...q, o: idx.map(i=>q.o[i]), a: idx.indexOf(q.a)};
+    });
+  }
+  pool=qs; cur=0; finished=false;
+  answers=pool.map(()=>({sel:null,correct:false}));
+  $('cover').classList.add('hidden');
+  $('results').classList.add('hidden');
+  $('review').classList.add('hidden');
+  $('quiz').classList.remove('hidden');
+  $('hdr').style.display='flex';
+  $('hTotal').textContent=pool.length;
+  buildNav();
+  startTimer();
+  render();
+  window.scrollTo(0,0);
+};
+
+// ---- timer ----
+function startTimer(){
+  startTs=Date.now(); elapsed=0;
+  clearInterval(timerId);
+  timerId=setInterval(()=>{
+    elapsed=Math.floor((Date.now()-startTs)/1000);
+    $('timer').textContent=fmt(elapsed);
+    $('timerPill').classList.toggle('warn', elapsed>=90*60);
+  },1000);
+}
+function fmt(s){const m=Math.floor(s/60),x=s%60;return String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+
+// ---- navigator ----
+function buildNav(){
+  const g=$('navGrid'); g.innerHTML='';
+  pool.forEach((_,i)=>{
+    const c=document.createElement('div'); c.className='navcell'; c.textContent=i+1;
+    c.onclick=()=>{cur=i;render();};
+    g.appendChild(c);
+  });
+}
+function paintNav(){
+  [...$('navGrid').children].forEach((c,i)=>{
+    c.classList.remove('cur','correct','wrong');
+    if(i===cur)c.classList.add('cur');
+    const a=answers[i];
+    if(a.sel!==null)c.classList.add(a.correct?'correct':'wrong');
+  });
+}
+
+// ---- render question ----
+function render(){
+  const q=pool[cur], a=answers[cur];
+  $('qBadge').textContent='Q'+(cur+1);
+  $('qSrc').textContent=q.paper;
+  $('hQ').textContent=cur+1;
+  $('qText').innerHTML=q.q;
+
+  const wrap=$('optWrap'); wrap.innerHTML='';
+  q.o.forEach((opt,i)=>{
+    const b=document.createElement('button'); b.className='optbtn';
+    b.innerHTML=`<span class="optkey">${KEY[i]}</span><span class="optbody">${opt}</span>`;
+    if(a.sel!==null){
+      b.disabled=true;
+      if(i===q.a)b.classList.add('correct');
+      if(i===a.sel&&a.sel!==q.a)b.classList.add('wrong');
+    } else {
+      b.onclick=()=>choose(i);
+    }
+    wrap.appendChild(b);
+  });
+
+  const fb=$('feedback'); fb.className='feedback';
+  if(a.sel!==null){
+    fb.classList.add('show', a.correct?'good':'bad');
+    let msg = a.correct
+      ? `<b>Correct.</b> The answer is ${KEY[q.a]}.`
+      : `<b>Not quite.</b> You chose ${KEY[a.sel]}. The correct answer is <b>${KEY[q.a]}</b>.`;
+    if(q.u) msg += `<span class="uflag">⚠ Uncertain item: ${q.u}</span>`;
+    fb.innerHTML=msg;
+  }
+
+  $('prevBtn').disabled=(cur===0);
+  $('nextBtn').textContent=(cur===pool.length-1)?'Finish →':'Next →';
+  paintNav();
+  updateMeters();
+  typeset($('quiz'));
+}
+
+function choose(i){
+  const q=pool[cur], a=answers[cur];
+  if(a.sel!==null)return;
+  a.sel=i; a.correct=(i===q.a);
+  render();
+}
+
+function updateMeters(){
+  const done=answers.filter(a=>a.sel!==null).length;
+  const correct=answers.filter(a=>a.correct).length;
+  $('hCorrect').textContent=correct;
+  $('answeredCount').textContent=done;
+  const pctW=(done/pool.length)*100;
+  $('answeredFill').style.width=pctW+'%';
+  $('topfill').style.width=(((cur+1)/pool.length)*100)+'%';
+}
+
+$('prevBtn').onclick=()=>{if(cur>0){cur--;render();window.scrollTo({top:0,behavior:'smooth'});}};
+$('nextBtn').onclick=()=>{
+  if(cur<pool.length-1){cur++;render();window.scrollTo({top:0,behavior:'smooth'});}
+  else finish();
+};
+$('finishBtn').onclick=finish;
+
+function saveProgress(subject, pct) {
+  try {
+    let progress = JSON.parse(localStorage.getItem('ned_quiz_progress') || '{}');
+    if (!progress[subject]) {
+      progress[subject] = { count: 0, totalScore: 0, avgScore: 0, lastScore: 0, lastDate: '' };
+    }
+    let s = progress[subject];
+    s.count = (s.count || 0) + 1;
+    s.totalScore = (s.totalScore || 0) + pct;
+    s.avgScore = Math.round(s.totalScore / s.count);
+    s.lastScore = pct;
+    s.lastDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    localStorage.setItem('ned_quiz_progress', JSON.stringify(progress));
+  } catch (e) {
+    console.error("Failed to save progress", e);
+  }
+}
+
+// ---- finish / results ----
+function finish(){
+  if(finished)return; finished=true;
+  clearInterval(timerId);
+  const correct=answers.filter(a=>a.correct).length;
+  const answered=answers.filter(a=>a.sel!==null).length;
+  const wrong=answered-correct;
+  const skip=pool.length-answered;
+  const pct=Math.round((correct/pool.length)*100);
+
+  saveProgress('maths', pct);
+
+  $('scorePct').textContent=pct+'%';
+  $('rCorrect').textContent=correct;
+  $('rWrong').textContent=wrong;
+  $('rSkip').textContent=skip;
+  $('rTime').textContent=fmt(elapsed);
+  let v;
+  if(pct>=85)v='Outstanding — exam-ready.';
+  else if(pct>=70)v='Strong. Tighten the weak topics.';
+  else if(pct>=50)v='Decent base. Drill the misses.';
+  else v='Keep grinding — review every miss.';
+  $('verdict').textContent=v;
+
+  $('quiz').classList.add('hidden');
+  $('hdr').style.display='none';
+  $('results').classList.remove('hidden');
+  $('topfill').style.width='100%';
+  window.scrollTo(0,0);
+}
+
+$('restartBtn').onclick=()=>$('startBtn').click();
+$('homeBtn').onclick=()=>{
+  $('results').classList.add('hidden');
+  $('review').classList.add('hidden');
+  $('cover').classList.remove('hidden');
+  $('hdr').style.display='none';
+  $('topfill').style.width='0';
+  window.scrollTo(0,0);
+};
+
+// ---- review ----
+$('reviewBtn').onclick=()=>{
+  const list=$('reviewList'); list.innerHTML='';
+  pool.forEach((q,i)=>{
+    const a=answers[i];
+    const cls=a.sel===null?'s':(a.correct?'c':'w');
+    const item=document.createElement('div'); item.className='rev-item '+cls;
+    let rows=`
+      <div class="revtop">
+        <span class="qbadge mono">Q${i+1}</span>
+        <span class="qsrc">${q.paper}</span>
+      </div>
+      <div class="rev-q">${q.q}</div>`;
+    if(a.sel===null){
+      rows+=`<div class="rev-row skip"><span class="tag">Your answer</span><span class="val">— skipped —</span></div>`;
+    } else {
+      rows+=`<div class="rev-row yours"><span class="tag">Your answer</span><span class="val">${KEY[a.sel]}. ${q.o[a.sel]}</span></div>`;
+    }
+    rows+=`<div class="rev-row right"><span class="tag">Correct</span><span class="val">${KEY[q.a]}. ${q.o[q.a]}</span></div>`;
+    if(q.u) rows+=`<div class="rev-uflag">⚠ Uncertain: ${q.u}</div>`;
+    item.innerHTML=rows;
+    list.appendChild(item);
+  });
+  $('results').classList.add('hidden');
+  $('review').classList.remove('hidden');
+  typeset($('review'));
+  window.scrollTo(0,0);
+};
+$('reviewBack').onclick=()=>{
+  $('review').classList.add('hidden');
+  $('results').classList.remove('hidden');
+  window.scrollTo(0,0);
+};
+
+// initial typeset of cover (no math, but safe)
+window.addEventListener('load',()=>{ if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise(); });
+</script>
+</body>
+</html>
